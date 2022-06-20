@@ -1,5 +1,6 @@
 # PieMenu widget for FreeCAD
 #
+# Copyright (C) 2022 mdkus @ FreeCAD
 # Copyright (C) 2016, 2017 triplus @ FreeCAD
 # Copyright (C) 2015,2016 looo @ FreeCAD
 # Copyright (C) 2015 microelly <microelly2@freecadbuch.de>
@@ -1009,23 +1010,15 @@ def pieMenuStart():
 
     def onButtonAddPieMenu():
 
-        if cBox.isEditable():
-            lineEdit = cBox.lineEdit()
-            cBox.setEditable(False)
-            buttonRemovePieMenu.setEnabled(True)
-            buttonAddPieMenu.setIcon(QtGui.QIcon())
-        else:
-            cBox.setEditable(True)
-            lineEdit = cBox.lineEdit()
-            lineEdit.clear()
-            lineEdit.setFocus()
-            buttonRemovePieMenu.setEnabled(False)
-            buttonAddPieMenu.setIcon(iconClose)
-
-        def onReturnPressed():
+        d = QtGui.QInputDialog(pieMenuDialog)
+        d.setModal(True)
+        d.setInputMode(QtGui.QInputDialog.InputMode.TextInput)
+        text, ok = QtGui.QInputDialog.getText(pieMenuDialog,
+                                              "New menu",
+                                              "Please insert menu name.")
+        if ok:
             paramIndexGet = App.ParamGet("User parameter:BaseApp/PieMenu/Index")
             indexList = paramIndexGet.GetString("IndexList")
-            text = lineEdit.text().encode('UTF-8')
 
             if indexList:
                 indexList = indexList.split(".,.")
@@ -1047,7 +1040,7 @@ def pieMenuStart():
                 a = str(i)
                 pieList.append(paramIndexGet.GetString(a))
 
-            if text in pieList:
+            if text.encode('UTF-8') in pieList:
                 pass
             elif not text:
                 pass
@@ -1077,20 +1070,11 @@ def pieMenuStart():
                     indexNumber = str(indexNumber)
                     paramIndexGet.GetGroup(indexNumber)
                     try:
-                        paramIndexGet.SetString(indexNumber, text)
+                        paramIndexGet.SetString(indexNumber, text.encode('UTF-8'))
                     except TypeError:
-                        paramIndexGet.SetString(indexNumber, lineEdit.text())
+                        paramIndexGet.SetString(indexNumber, text)
 
                 cBoxUpdate()
-
-        lineEdit.returnPressed.connect(onReturnPressed)
-
-        def onEditingFinished():
-            cBox.setEditable(False)
-            buttonRemovePieMenu.setEnabled(True)
-            buttonAddPieMenu.setIcon(QtGui.QIcon())
-
-        lineEdit.editingFinished.connect(onEditingFinished)
 
     buttonAddPieMenu.clicked.connect(onButtonAddPieMenu)
 
@@ -1764,6 +1748,8 @@ def pieMenuStart():
         group.SetInt("Button", 32)
 
     def onControl():
+
+        global pieMenuDialog
 
         for i in mw.findChildren(QtGui.QDialog):
             if i.objectName() == "PieMenuPreferences":
