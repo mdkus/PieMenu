@@ -36,6 +36,7 @@ def pieMenuStart():
     import PieMenuLocator as locator
 
     path = locator.path()
+    respath = path + "/Resources/icons/"
 
     styleButton = ("""
         QToolButton {
@@ -1004,91 +1005,38 @@ def pieMenuStart():
 
     buttonAddPieMenu = QtGui.QToolButton()
     buttonAddPieMenu.setText("+")
+    buttonAddPieMenu.setToolTip("Add new pie menu")
     buttonAddPieMenu.setMinimumHeight(30)
     buttonAddPieMenu.setMinimumWidth(30)
 
 
-    def onButtonAddPieMenu():
+    def inputTextDialog(title):
 
         d = QtGui.QInputDialog(pieMenuDialog)
         d.setModal(True)
         d.setInputMode(QtGui.QInputDialog.InputMode.TextInput)
         text, ok = QtGui.QInputDialog.getText(pieMenuDialog,
-                                              "New menu",
+                                              title,
                                               "Please insert menu name.")
         if ok:
-            paramIndexGet = App.ParamGet("User parameter:BaseApp/PieMenu/Index")
-            indexList = paramIndexGet.GetString("IndexList")
-
-            if indexList:
-                indexList = indexList.split(".,.")
-
-                temp = []
-
-                for i in indexList:
-                    temp.append(int(i))
-
-                indexList = temp
-
+            index = cBox.findText(text)
+            if index == -1:
+                return text, ok
+        while index != -1:
+            d = QtGui.QInputDialog(pieMenuDialog)
+            d.setModal(True)
+            d.setInputMode(QtGui.QInputDialog.InputMode.TextInput)
+            text, ok = QtGui.QInputDialog.getText(pieMenuDialog,
+                                                  title,
+                                                  "Menu already exists.")
+            if ok:
+                index = cBox.findText(text)
             else:
-
-                indexList = []
-
-            pieList = []
-
-            for i in indexList:
-                a = str(i)
-                pieList.append(paramIndexGet.GetString(a))
-
-            if text.encode('UTF-8') in pieList:
-                pass
-            elif not text:
-                pass
-            else:
-
-                if text == "restore_default_pie" and text.lower():
-                    setDefaultPie()
-                else:
-                    x = 1
-
-                    while x in indexList and x < 999:
-                        x = x + 1
-                    else:
-                        indexNumber = x
-
-                    indexList.append(indexNumber)
-
-                    temp = []
-
-                    for i in indexList:
-                        temp.append(str(i))
-
-                    indexList = temp
-
-                    paramIndexGet.SetString("IndexList", ".,.".join(indexList))
-
-                    indexNumber = str(indexNumber)
-                    paramIndexGet.GetGroup(indexNumber)
-                    try:
-                        paramIndexGet.SetString(indexNumber, text.encode('UTF-8'))
-                    except TypeError:
-                        paramIndexGet.SetString(indexNumber, text)
-
-                cBoxUpdate()
-
-    buttonAddPieMenu.clicked.connect(onButtonAddPieMenu)
-
-    buttonRemovePieMenu = QtGui.QToolButton()
-    buttonRemovePieMenu.setText("-")
-    buttonRemovePieMenu.setMinimumHeight(30)
-    buttonRemovePieMenu.setMinimumWidth(30)
+                return False
+        return text, ok
 
 
-    def onButtonRemovePieMenu():
-        paramIndexGet = App.ParamGet("User parameter:BaseApp/PieMenu/Index")
-        indexList = paramIndexGet.GetString("IndexList")
-
-        text = cBox.currentText()
+    def splitIndexList(indexList):
 
         if indexList:
             indexList = indexList.split(".,.")
@@ -1099,10 +1047,78 @@ def pieMenuStart():
                 temp.append(int(i))
 
             indexList = temp
+        else:
+            indexList = []
 
+        return indexList
+
+
+    def onButtonAddPieMenu():
+
+        text, ok = inputTextDialog("New menu")
+        if not ok:
+            return
+                
+        paramIndexGet = App.ParamGet("User parameter:BaseApp/PieMenu/Index")
+        indexList = paramIndexGet.GetString("IndexList")
+        indexList = splitIndexList(indexList)
+
+        pieList = []
+
+        for i in indexList:
+            a = str(i)
+            pieList.append(paramIndexGet.GetString(a))
+
+        if text.encode('UTF-8') in pieList:
+            pass
+        elif not text:
+            pass
         else:
 
-            indexList = []
+            if text == "restore_default_pie" and text.lower():
+                setDefaultPie()
+            else:
+                x = 1
+
+                while x in indexList and x < 999:
+                    x = x + 1
+                else:
+                    indexNumber = x
+
+                indexList.append(indexNumber)
+
+                temp = []
+
+                for i in indexList:
+                    temp.append(str(i))
+
+                indexList = temp
+
+                paramIndexGet.SetString("IndexList", ".,.".join(indexList))
+
+                indexNumber = str(indexNumber)
+                try:
+                    paramIndexGet.SetString(indexNumber, text.encode('UTF-8'))
+                except TypeError:
+                    paramIndexGet.SetString(indexNumber, text)
+
+            cBoxUpdate()
+
+    buttonAddPieMenu.clicked.connect(onButtonAddPieMenu)
+
+    buttonRemovePieMenu = QtGui.QToolButton()
+    buttonRemovePieMenu.setText("-")
+    buttonRemovePieMenu.setToolTip("Remove current pie menu")
+    buttonRemovePieMenu.setMinimumHeight(30)
+    buttonRemovePieMenu.setMinimumWidth(30)
+
+
+    def onButtonRemovePieMenu():
+        paramIndexGet = App.ParamGet("User parameter:BaseApp/PieMenu/Index")
+        indexList = paramIndexGet.GetString("IndexList")
+        indexList = splitIndexList(indexList)
+
+        text = cBox.currentText()
 
         for i in indexList:
             a = str(i)
@@ -1136,6 +1152,160 @@ def pieMenuStart():
             pass
 
     buttonRemovePieMenu.clicked.connect(onButtonRemovePieMenu)
+
+    buttonRenamePieMenu = QtGui.QToolButton()
+    buttonRenamePieMenu.setToolTip("Rename current pie menu")
+    buttonRenamePieMenu.setIcon(QtGui.QIcon(respath + "PieMenuRename.svg"))
+    buttonRenamePieMenu.setMinimumHeight(30)
+    buttonRenamePieMenu.setMinimumWidth(30)
+    
+    
+    def onButtonRenamePieMenu():
+
+        text, ok = inputTextDialog("Rename menu")
+        if not ok:
+            return
+
+        paramIndexGet = App.ParamGet("User parameter:BaseApp/PieMenu/Index")
+        indexList = paramIndexGet.GetString("IndexList")
+        indexList = splitIndexList(indexList)
+
+        currentText = cBox.currentText()
+
+        for i in indexList:
+            a = str(i)
+            try:
+                pie = paramIndexGet.GetString(a).decode("UTF-8")
+            except AttributeError:
+                pie = paramIndexGet.GetString(a)
+            if pie == currentText:
+                #Msg('text:' + text +  '\na:' + a + '\n')
+                try:
+                    paramIndexGet.SetString(a, text.encode('UTF-8'))
+                except TypeError:
+                    paramIndexGet.SetString(a, text)
+
+        cBoxUpdate()
+
+    buttonRenamePieMenu.clicked.connect(onButtonRenamePieMenu)    
+    
+    buttonCopyPieMenu = QtGui.QToolButton()
+    buttonCopyPieMenu.setToolTip("Copy current pie menu")
+    buttonCopyPieMenu.setIcon(QtGui.QIcon(respath + "PieMenuCopy.svg"))
+    buttonCopyPieMenu.setMinimumHeight(30)
+    buttonCopyPieMenu.setMinimumWidth(30)
+
+
+    def getCurrentMenuIndex(currentMenuName):
+
+        paramIndexGet = App.ParamGet("User parameter:BaseApp/PieMenu/Index")
+        indexList = paramIndexGet.GetString("IndexList")
+        indexList = splitIndexList(indexList)
+
+        for i in indexList:
+            a = str(i)
+            indexName = paramIndexGet.GetString(a)
+            if indexName == currentMenuName:
+                return a;
+
+        return "-1"
+
+    def copyIndexParams(grpOrg, grpCopy):
+        
+        valButOrg = grpOrg.GetInt("Button")
+        valRadOrg = grpOrg.GetInt("Radius")
+        tbOrg = grpOrg.GetString("ToolList")
+
+        grpCopy.SetInt("Button", valButOrg)
+        grpCopy.SetInt("Radius", valRadOrg)
+        grpCopy.SetString("ToolList", tbOrg)
+
+    def copyContextParams(grpOrg, grpCopy):
+
+        grpCntOrg = grpOrg.GetGroup("Context")
+        grpCntCopy = grpCopy.GetGroup("Context")
+
+        enabledOrg = grpCntOrg.GetBool("Enabled")
+        vtxSgnOrg = grpCntOrg.GetString("VertexSign")
+        vtxValOrg = grpCntOrg.GetInt("VertexValue")
+        edgSgnOrg = grpCntOrg.GetString("EdgeSign")
+        edgValOrg = grpCntOrg.GetInt("EdgeValue")
+        fceSgnOrg = grpCntOrg.GetString("FaceSign")
+        fceValOrg = grpCntOrg.GetInt("FaceValue")
+        objSgnOrg = grpCntOrg.GetString("ObjectSign")
+        objValOrg = grpCntOrg.GetInt("ObjectValue")
+
+        grpCntCopy.SetBool("Enabled", enabledOrg)
+        grpCntCopy.SetString("VertexSign", vtxSgnOrg)
+        grpCntCopy.SetInt("VertexValue", vtxValOrg)
+        grpCntCopy.SetString("EdgeSign", edgSgnOrg)
+        grpCntCopy.SetInt("EdgeValue", edgValOrg)
+        grpCntCopy.SetString("FaceSign", fceSgnOrg)
+        grpCntCopy.SetInt("FaceValue", fceValOrg)
+        grpCntCopy.SetString("ObjectSign", objSgnOrg)
+        grpCntCopy.SetInt("ObjectValue", objValOrg)
+
+    
+    def onButtonCopyPieMenu():
+        
+        text, ok = inputTextDialog("Copy menu")
+        if not ok:
+            return
+
+        paramIndexGet = App.ParamGet("User parameter:BaseApp/PieMenu/Index")
+        indexList = paramIndexGet.GetString("IndexList")
+        indexList = splitIndexList(indexList)
+
+        currentMenuName = cBox.currentText()
+        indexOrg = getCurrentMenuIndex(currentMenuName)
+
+        pieList = []
+
+        for i in indexList:
+            a = str(i)
+            pieList.append(paramIndexGet.GetString(a))
+
+        if text.encode('UTF-8') in pieList:
+            pass
+        elif not text:
+            pass
+        else:
+
+            if text == "restore_default_pie" and text.lower():
+                setDefaultPie()
+            else:
+                x = 1
+
+                while x in indexList and x < 999:
+                    x = x + 1
+                else:
+                    indexCopy = x
+
+                indexList.append(indexCopy)
+
+                temp = []
+
+                for i in indexList:
+                    temp.append(str(i))
+
+                indexList = temp
+
+                paramIndexGet.SetString("IndexList", ".,.".join(indexList))
+
+                indexCopy = str(indexCopy)
+                grpOrg = paramIndexGet.GetGroup(indexOrg)
+                grpCopy = paramIndexGet.GetGroup(indexCopy)
+                copyIndexParams(grpOrg, grpCopy)
+                copyContextParams(grpOrg, grpCopy)
+
+                try:
+                    paramIndexGet.SetString(indexCopy, text.encode('UTF-8'))
+                except TypeError:
+                    paramIndexGet.SetString(indexCopy, text)
+
+        cBoxUpdate()
+    
+    buttonCopyPieMenu.clicked.connect(onButtonCopyPieMenu)
 
     labelRadius = QtGui.QLabel("Pie size")
     spinRadius = QtGui.QSpinBox()
@@ -1767,6 +1937,8 @@ def pieMenuStart():
         layoutAddRemove.addWidget(cBox)
         layoutAddRemove.addWidget(buttonAddPieMenu)
         layoutAddRemove.addWidget(buttonRemovePieMenu)
+        layoutAddRemove.addWidget(buttonRenamePieMenu)
+        layoutAddRemove.addWidget(buttonCopyPieMenu)
 
         layoutRadius = QtGui.QHBoxLayout()
         layoutRadius.addWidget(labelRadius)
