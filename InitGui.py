@@ -531,8 +531,13 @@ def pieMenuStart():
             contextPhase = paramGet.GetBool("ContextPhase")
 
             if contextPhase:
-                self.hide()
-                paramGet.SetBool("ContextPhase", 0)
+                sel = Gui.Selection.getSelectionEx()
+                if not sel:
+                    self.hide()
+                    paramGet.SetBool("ContextPhase", 0)
+                    updateCommands()
+                else:
+                    pass
             else:
                 updateCommands()
 
@@ -1179,7 +1184,6 @@ def pieMenuStart():
             except AttributeError:
                 pie = paramIndexGet.GetString(a)
             if pie == currentText:
-                #Msg('text:' + text +  '\na:' + a + '\n')
                 try:
                     paramIndexGet.SetString(a, text.encode('UTF-8'))
                 except TypeError:
