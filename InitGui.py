@@ -529,6 +529,7 @@ def pieMenuStart():
             paramGet = App.ParamGet("User parameter:BaseApp/PieMenu")
 
             contextPhase = paramGet.GetBool("ContextPhase")
+            enableContext = paramGet.GetBool("EnableContext")
 
             if contextPhase:
                 sel = Gui.Selection.getSelectionEx()
@@ -536,8 +537,11 @@ def pieMenuStart():
                     self.hide()
                     paramGet.SetBool("ContextPhase", 0)
                     updateCommands()
+                elif not enableContext:
+                    self.hide()
+                    updateCommands()
                 else:
-                    pass
+                    updateCommands(context=True)
             else:
                 updateCommands()
 
