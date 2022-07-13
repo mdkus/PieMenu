@@ -214,7 +214,7 @@ def pieMenuStart():
             paramGet.SetString("TriggerMode", text)
 
             PieMenuInstance.hide()
-            PieMenuInstance.showAtMouse()
+            PieMenuInstance.showAtMouse(notKeyTriggered=True)
 
         modeGroup.triggered.connect(onModeGroup)
 
@@ -294,7 +294,7 @@ def pieMenuStart():
                 paramGet.SetString("CurrentPie", text)
 
             PieMenuInstance.hide()
-            PieMenuInstance.showAtMouse()
+            PieMenuInstance.showAtMouse(notKeyTriggered=True)
 
         pieGroup.triggered.connect(onPieGroup)
 
@@ -352,7 +352,7 @@ def pieMenuStart():
             paramGet.SetString("ToolBar", text)
 
             PieMenuInstance.hide()
-            PieMenuInstance.showAtMouse()
+            PieMenuInstance.showAtMouse(notKeyTriggered=True)
 
         toolbarGroup.triggered.connect(onToolbarGroup)
 
@@ -519,13 +519,14 @@ def pieMenuStart():
                     i.setAttribute(QtCore.Qt.WA_PaintOnScreen)
 
         def hide(self):
-
             for i in self.buttons:
                 i.hide()
 
             self.menu.hide()
 
-        def showAtMouse(self):
+        def showAtMouse(self, notKeyTriggered=False):
+            global lastPosX
+            global lastPosY
             paramGet = App.ParamGet("User parameter:BaseApp/PieMenu")
 
             contextPhase = paramGet.GetBool("ContextPhase")
@@ -550,6 +551,12 @@ def pieMenuStart():
             else:
                 if windowShadow:
                     pos = mw.mapFromGlobal(QtGui.QCursor.pos())
+                    if notKeyTriggered:
+                        pos.setX(lastPosX)
+                        pos.setY(lastPosY)
+                    else:
+                        lastPosX = pos.x()
+                        lastPosY = pos.y()
 
                     self.menu.popup(QtCore.QPoint(mw.pos()))
                     self.menu.setGeometry(mw.geometry())
@@ -564,6 +571,12 @@ def pieMenuStart():
                         i.repaint()
                 else:
                     pos = QtGui.QCursor.pos()
+                    if notKeyTriggered:
+                        pos.setX(lastPosX)
+                        pos.setY(lastPosY)
+                    else:
+                        lastPosX = pos.x()
+                        lastPosY = pos.y()
 
                     for i in self.buttons:
                         i.move(i.property("ButtonX") + (self.menuSize - i.size().width()) / 2,
@@ -726,7 +739,7 @@ def pieMenuStart():
             updateCommands(context=True)
 
             PieMenuInstance.hide()
-            PieMenuInstance.showAtMouse()
+            PieMenuInstance.showAtMouse(notKeyTriggered=True)
         else:
             pass
 
