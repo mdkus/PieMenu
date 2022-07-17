@@ -315,13 +315,7 @@ def pieMenuStart():
                 for a in i.findChildren(QtGui.QToolButton):
                     try:
                         if not a.defaultAction().isSeparator():
-                            if not a.menu():
-                                if not a.defaultAction().menu():
-                                    commands.append(a.defaultAction())
-                                else:
-                                    pass
-                            else:
-                                pass
+                            commands.append(a.defaultAction())
                         else:
                             pass
                     except AttributeError:
@@ -811,11 +805,8 @@ def pieMenuStart():
                                 if a.menu():
                                     for b in a.menu().actions():
                                         commands.append(b)
-                                elif not a.defaultAction().menu():
-                                    commands.append(a.defaultAction())
                                 else:
-                                    for b in a.defaultAction().menu().actions():
-                                        commands.append(b)
+                                    commands.append(a.defaultAction())
                             else:
                                 pass
                         except AttributeError:
