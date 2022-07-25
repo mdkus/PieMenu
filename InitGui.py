@@ -1089,7 +1089,7 @@ def pieMenuStart():
         else:
 
             if text == "restore_default_pie" and text.lower():
-                setDefaultPie()
+                setDefaultPie(restore=True)
             else:
                 x = 1
 
@@ -1282,38 +1282,34 @@ def pieMenuStart():
         elif not text:
             pass
         else:
+            x = 1
 
-            if text == "restore_default_pie" and text.lower():
-                setDefaultPie()
+            while x in indexList and x < 999:
+                x = x + 1
             else:
-                x = 1
+                indexCopy = x
 
-                while x in indexList and x < 999:
-                    x = x + 1
-                else:
-                    indexCopy = x
+            indexList.append(indexCopy)
 
-                indexList.append(indexCopy)
+            temp = []
 
-                temp = []
+            for i in indexList:
+                temp.append(str(i))
 
-                for i in indexList:
-                    temp.append(str(i))
+            indexList = temp
 
-                indexList = temp
+            paramIndexGet.SetString("IndexList", ".,.".join(indexList))
 
-                paramIndexGet.SetString("IndexList", ".,.".join(indexList))
+            indexCopy = str(indexCopy)
+            grpOrg = paramIndexGet.GetGroup(indexOrg)
+            grpCopy = paramIndexGet.GetGroup(indexCopy)
+            copyIndexParams(grpOrg, grpCopy)
+            copyContextParams(grpOrg, grpCopy)
 
-                indexCopy = str(indexCopy)
-                grpOrg = paramIndexGet.GetGroup(indexOrg)
-                grpCopy = paramIndexGet.GetGroup(indexCopy)
-                copyIndexParams(grpOrg, grpCopy)
-                copyContextParams(grpOrg, grpCopy)
-
-                try:
-                    paramIndexGet.SetString(indexCopy, text.encode('UTF-8'))
-                except TypeError:
-                    paramIndexGet.SetString(indexCopy, text)
+            try:
+                paramIndexGet.SetString(indexCopy, text.encode('UTF-8'))
+            except TypeError:
+                paramIndexGet.SetString(indexCopy, text)
 
         cBoxUpdate()
     
@@ -1877,7 +1873,7 @@ def pieMenuStart():
         contextList()
 
 
-    def setDefaultPie():
+    def setDefaultPie(restore=False):
         paramGet = App.ParamGet("User parameter:BaseApp/PieMenu")
         paramIndexGet = App.ParamGet("User parameter:BaseApp/PieMenu/Index")
         indexList = paramIndexGet.GetString("IndexList")
@@ -1887,7 +1883,7 @@ def pieMenuStart():
                         "Std_ViewRight",
                         "Std_BoxSelection",
                         "Std_ViewBottom",
-                        "Std_ViewAxo",
+                        "Std_ViewIsometric",
                         "Std_ViewLeft",
                         "Std_ViewScreenShot"]
 
@@ -1904,7 +1900,11 @@ def pieMenuStart():
             indexList = []
 
         if 0 in indexList:
-            pass
+            if restore:
+                group = paramIndexGet.GetGroup("0")
+                group.SetString("ToolList", ".,.".join(defaultTools))                
+            else:
+                pass
         else:
             indexList.append(0)
 
