@@ -305,6 +305,11 @@ def pieMenuStart():
 
             if paramGet.GetBool("ToolBar"):
                 text = paramGet.GetString("ToolBar")
+                if ": " in text:
+                    toolbar_desc = text.split(": ")
+                    text = toolbar_desc[1]
+                else:
+                    pass
             else:
                 text = None
 
@@ -343,8 +348,34 @@ def pieMenuStart():
 
             paramGet.SetBool("ToolBar", True)
             text = toolbarGroup.checkedAction().data()
-            paramGet.SetString("ToolBar", text)
 
+            workbenches = []
+            for i in mw.findChildren(QtGui.QToolBar):
+                if i.objectName() == text:
+                    for a in i.findChildren(QtGui.QToolButton):
+                        try:
+                            if not a.defaultAction().isSeparator():
+                                action = a.defaultAction().objectName()
+                                if len(action) == 0:
+                                    workbench = "None"
+                                else:
+                                    cmd_parts = action.split("_")
+                                    workbench = cmd_parts[0]
+                                if not workbench in workbenches:
+                                    workbenches.append(workbench)
+                                else:
+                                    pass
+                            else:
+                                pass
+                        except AttributeError:
+                            pass
+                else:
+                    pass
+
+            toolbar_desc = ", ".join(workbenches)
+            toolbar_desc = toolbar_desc + ': ' + text
+            paramGet.SetString("ToolBar", toolbar_desc)
+            
             PieMenuInstance.hide()
             PieMenuInstance.showAtMouse(notKeyTriggered=True)
 
@@ -794,9 +825,22 @@ def pieMenuStart():
             commands = []
 
             paramGet = App.ParamGet("User parameter:BaseApp/PieMenu")
-
             toolbar = paramGet.GetString("ToolBar")
+            if ": " in toolbar:
+                toolbar_desc = toolbar.split(": ")
+                toolbar = toolbar_desc[1]
+                workbenches = toolbar_desc[0]
+                workbenches = workbenches.split(", ")
+                lastWorkbench = Gui.activeWorkbench()
 
+                for i in workbenches:
+                    if i == "None" or i == "Std":
+                        pass
+                    else:
+                        Gui.activateWorkbench(i + "Workbench")
+                Gui.activateWorkbench(lastWorkbench.__class__.__name__)
+            else:
+                pass
             for i in mw.findChildren(QtGui.QToolBar):
                 if i.objectName() == toolbar:
                     for a in i.findChildren(QtGui.QToolButton):
@@ -866,15 +910,32 @@ def pieMenuStart():
             commands = []
 
             actionList = getActionList()
+            lastWorkbench = Gui.activeWorkbench()
+            
+            while getCommands(commands, toolList, actionList):
+                actionList = getActionList()
+            else:
+                pass
 
-            for i in toolList:
-                if i in actionList:
-                    commands.append(actionList[i])
-                else:
-                    pass
+            Gui.activateWorkbench(lastWorkbench.__class__.__name__)
 
         PieMenuInstance.add_commands(commands, context)
 
+    def getCommands(commands, toolList, actionList):
+
+        for i in toolList:
+            if i in actionList:
+                if not actionList[i] in commands:
+                    commands.append(actionList[i])
+                else:
+                    pass
+            else:
+                cmd_parts = i.split("_")
+                cmdWb = cmd_parts[0] + "Workbench"
+                Gui.activateWorkbench(cmdWb)
+                return True
+                
+        return False
 
     def getGroup(mode=0):
         paramGet = App.ParamGet("User parameter:BaseApp/PieMenu")
@@ -953,6 +1014,23 @@ def pieMenuStart():
 
         buttonListWidget.clear()
 
+        workbenches = []
+        lastWorkbench = Gui.activeWorkbench()
+
+        for i in toolList:
+            if i not in actionList:
+                cmd_parts = i.split("_")
+                if cmd_parts[0] not in workbenches:
+                    workbenches.append(cmd_parts[0])
+                    Gui.activateWorkbench(cmd_parts[0] + "Workbench")
+                else:
+                    pass
+            else:
+                pass
+
+        Gui.activateWorkbench(lastWorkbench.__class__.__name__)
+        actionList = getActionList()
+
         for i in toolList:
             if i in actionList:
                 item = QtGui.QListWidgetItem(buttonListWidget)
@@ -1009,8 +1087,8 @@ def pieMenuStart():
 
 
     def onPieChange():
-        toolList()
         buttonList()
+        toolList()
         setDefaults()
         setCheckContext()
 
@@ -2024,10 +2102,6 @@ def pieMenuStart():
         pieMenuDialogLayout.addWidget(preferencesWidget)
 
         cBoxUpdate()
-        buttonList()
-        toolList()
-        setDefaults()
-        setCheckContext()
 
     mw = Gui.getMainWindow()
     start = True
