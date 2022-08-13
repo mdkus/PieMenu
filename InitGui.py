@@ -1103,27 +1103,46 @@ def pieMenuStart():
 
     def inputTextDialog(title):
 
+        info1 = "Please insert menu name"
+        info2 = "Menu already exists"
+
         d = QtGui.QInputDialog(pieMenuDialog)
         d.setModal(True)
         d.setInputMode(QtGui.QInputDialog.InputMode.TextInput)
         text, ok = QtGui.QInputDialog.getText(pieMenuDialog,
                                               title,
-                                              "Please insert menu name.")
-        if ok:
-            index = cBox.findText(text)
-            if index == -1:
+                                              info1)
+        if not ok:
+            return text, ok
+
+        while not text:
+            text, ok = QtGui.QInputDialog.getText(pieMenuDialog,
+                                              title,
+                                              info1)
+            if not ok:
                 return text, ok
+            else:
+                pass
+
+        index = cBox.findText(text)
+        info = info2
+
         while index != -1:
             d = QtGui.QInputDialog(pieMenuDialog)
             d.setModal(True)
             d.setInputMode(QtGui.QInputDialog.InputMode.TextInput)
             text, ok = QtGui.QInputDialog.getText(pieMenuDialog,
                                                   title,
-                                                  "Menu already exists.")
+                                                  info)
             if ok:
-                index = cBox.findText(text)
+                if text:
+                    index = cBox.findText(text)
+                    info = info2
+                else:
+                    info = info1
             else:
-                return False
+                return text, ok
+
         return text, ok
 
 
