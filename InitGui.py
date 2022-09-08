@@ -24,6 +24,8 @@
 # http://forum.freecadweb.org/
 # http://www.freecadweb.org/wiki/index.php?title=Code_snippets
 
+global PIE_MENU_VERSION
+PIE_MENU_VERSION = "1.1"
 
 def pieMenuStart():
     import math
@@ -2113,7 +2115,7 @@ def pieMenuStart():
         pieMenuDialog = QtGui.QDialog(mw)
         pieMenuDialog.resize(800, 450)
         pieMenuDialog.setObjectName("PieMenuPreferences")
-        pieMenuDialog.setWindowTitle("PieMenu")
+        pieMenuDialog.setWindowTitle("PieMenu " + PIE_MENU_VERSION)
         pieMenuDialogLayout = QtGui.QVBoxLayout()
         pieMenuDialog.setLayout(pieMenuDialogLayout)
         pieMenuDialog.show()
@@ -2173,6 +2175,3 @@ def pieMenuStart():
         pass
 
 pieMenuStart()
-
-
-import PieMenuGui
