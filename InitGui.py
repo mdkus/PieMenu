@@ -25,7 +25,7 @@
 # http://www.freecadweb.org/wiki/index.php?title=Code_snippets
 
 global PIE_MENU_VERSION
-PIE_MENU_VERSION = "1.1"
+PIE_MENU_VERSION = "1.1.1"
 
 def pieMenuStart():
     import math
@@ -1278,10 +1278,14 @@ def pieMenuStart():
         if not ok:
             return
 
+        paramGet = App.ParamGet("User parameter:BaseApp/PieMenu")
         paramIndexGet = App.ParamGet("User parameter:BaseApp/PieMenu/Index")
         indexList = paramIndexGet.GetString("IndexList")
         indexList = splitIndexList(indexList)
-
+        try:
+            currentPie = paramGet.GetString("CurrentPie").decode("UTF-8")
+        except AttributeError:
+            currentPie = paramGet.GetString("CurrentPie")
         currentText = cBox.currentText()
 
         for i in indexList:
@@ -1295,7 +1299,13 @@ def pieMenuStart():
                     paramIndexGet.SetString(a, text.encode('UTF-8'))
                 except TypeError:
                     paramIndexGet.SetString(a, text)
-
+                if pie == currentPie:
+                    try:
+                        paramGet.SetString("CurrentPie", text.encode('UTF-8'))
+                    except TypeError:
+                        paramGet.SetString("CurrentPie", text)
+                else:
+                    pass
         cBoxUpdate()
 
     buttonRenamePieMenu.clicked.connect(onButtonRenamePieMenu)    
