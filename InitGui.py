@@ -25,7 +25,7 @@
 # http://www.freecadweb.org/wiki/index.php?title=Code_snippets
 
 global PIE_MENU_VERSION
-PIE_MENU_VERSION = "1.1.1"
+PIE_MENU_VERSION = "1.1.2"
 
 def pieMenuStart():
     import math
@@ -39,6 +39,43 @@ def pieMenuStart():
 
     path = locator.path()
     respath = path + "/Resources/icons/"
+    
+    
+    def accessoriesMenu():
+        """Add pie menu preferences to accessories menu."""
+        pref = QtGui.QAction(mw)
+        pref.setText("Pie menu")
+        pref.setObjectName("PieMenu")
+        pref.triggered.connect(onPreferences)
+        try:
+            import AccessoriesMenu
+            AccessoriesMenu.addItem("PieMenu")
+        except ImportError:
+            a = mw.findChild(QtGui.QAction, "AccessoriesMenu")
+            if a:
+                a.menu().addAction(pref)
+            else:
+                mb = mw.menuBar()
+                action = QtGui.QAction(mw)
+                action.setObjectName("AccessoriesMenu")
+                action.setIconText("Accessories")
+                menu = QtGui.QMenu()
+                action.setMenu(menu)
+                menu.addAction(pref)
+
+                def addMenu():
+                    """Add accessories menu to the menu bar."""
+                    mb.addAction(action)
+                    action.setVisible(True)
+
+                addMenu()
+                mw.workbenchActivated.connect(addMenu)
+                
+                
+    def onPreferences():
+        """Open the preferences dialog."""
+        onControl()
+
 
     styleButton = ("""
         QToolButton {
@@ -2144,7 +2181,8 @@ def pieMenuStart():
             pass
 
     if start:
-
+    
+        accessoriesMenu()
         compositingManager = True
         if QtCore.qVersion() < "5":
             windowShadow = False
