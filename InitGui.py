@@ -25,7 +25,7 @@
 # http://www.freecadweb.org/wiki/index.php?title=Code_snippets
 
 global PIE_MENU_VERSION
-PIE_MENU_VERSION = "1.1.3"
+PIE_MENU_VERSION = "1.1.4"
 
 def pieMenuStart():
     import math
@@ -970,6 +970,9 @@ def pieMenuStart():
                     pass
             else:
                 cmd_parts = i.split("_")
+                # treatment of special cases
+                if cmd_parts[0] == "FEM":
+                    cmd_parts[0] = "Fem"
                 cmdWb = cmd_parts[0] + "Workbench"
                 Gui.activateWorkbench(cmdWb)
                 return True
