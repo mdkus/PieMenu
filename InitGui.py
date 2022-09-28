@@ -25,7 +25,7 @@
 # http://www.freecadweb.org/wiki/index.php?title=Code_snippets
 
 global PIE_MENU_VERSION
-PIE_MENU_VERSION = "1.1.4"
+PIE_MENU_VERSION = "1.1.5"
 
 def pieMenuStart():
     import math
@@ -40,6 +40,8 @@ def pieMenuStart():
     path = locator.path()
     respath = path + "/Resources/icons/"
     
+    # global status variables
+    selectionTriggered = False
     
     def accessoriesMenu():
         """Add pie menu preferences to accessories menu."""
@@ -589,8 +591,11 @@ def pieMenuStart():
             self.menu.hide()
 
         def showAtMouse(self, notKeyTriggered=False):
+        
+            nonlocal selectionTriggered
             global lastPosX
             global lastPosY
+            
             paramGet = App.ParamGet("User parameter:BaseApp/PieMenu")
 
             contextPhase = paramGet.GetBool("ContextPhase")
@@ -616,8 +621,18 @@ def pieMenuStart():
                 if windowShadow:
                     pos = mw.mapFromGlobal(QtGui.QCursor.pos())
                     if notKeyTriggered:
-                        pos.setX(lastPosX)
-                        pos.setY(lastPosY)
+                        if contextPhase:
+                            # special case treatment
+                            if selectionTriggered:
+                                selectionTriggered = False
+                            else:
+                                pos.setX(lastPosX)
+                                pos.setY(lastPosY)
+                            lastPosX = pos.x()
+                            lastPosY = pos.y()
+                        else:
+                            pos.setX(lastPosX)
+                            pos.setY(lastPosY)
                     else:
                         lastPosX = pos.x()
                         lastPosY = pos.y()
@@ -636,12 +651,22 @@ def pieMenuStart():
                 else:
                     pos = QtGui.QCursor.pos()
                     if notKeyTriggered:
-                        pos.setX(lastPosX)
-                        pos.setY(lastPosY)
+                        if contextPhase:
+                            # special case treatment
+                            if selectionTriggered:
+                                selectionTriggered = False
+                            else:
+                                pos.setX(lastPosX)
+                                pos.setY(lastPosY)
+                            lastPosX = pos.x()
+                            lastPosY = pos.y()
+                        else:
+                            pos.setX(lastPosX)
+                            pos.setY(lastPosY)
                     else:
                         lastPosX = pos.x()
                         lastPosY = pos.y()
-
+                        
                     for i in self.buttons:
                         i.move(i.property("ButtonX") + (self.menuSize - i.size().width()) / 2,
                                i.property("ButtonY") + (self.menuSize - i.size().height()) / 2)
@@ -756,6 +781,9 @@ def pieMenuStart():
 
 
     def listTopo():
+    
+        nonlocal selectionTriggered
+
         sel = Gui.Selection.getSelectionEx()
         paramGet = App.ParamGet("User parameter:BaseApp/PieMenu")
         paramIndexGet = App.ParamGet("User parameter:BaseApp/PieMenu/Index")
@@ -801,8 +829,8 @@ def pieMenuStart():
             paramGet.SetBool("ContextPhase", 1)
 
             updateCommands(context=True)
-
             PieMenuInstance.hide()
+            selectionTriggered = True
             PieMenuInstance.showAtMouse(notKeyTriggered=True)
         else:
             pass
