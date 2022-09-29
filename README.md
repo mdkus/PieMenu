@@ -28,4 +28,4 @@ Windows:
 Press the Tab key on the keyboard to invoke PieMenu.
 
 ### Discussion
-FreeCAD forum thread: https://forum.freecadweb.org/viewtopic.php?f=34&t=29108
+FreeCAD forum thread: https://forum.freecadweb.org/viewtopic.php?f=34&t=72205
