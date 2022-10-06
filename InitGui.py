@@ -25,7 +25,7 @@
 # http://www.freecadweb.org/wiki/index.php?title=Code_snippets
 
 global PIE_MENU_VERSION
-PIE_MENU_VERSION = "1.1.6"
+PIE_MENU_VERSION = "1.1.7"
 
 def pieMenuStart():
     import math
@@ -1305,6 +1305,10 @@ def pieMenuStart():
             currentPie = paramGet.GetString("CurrentPie").decode("UTF-8")
         except AttributeError:
             currentPie = paramGet.GetString("CurrentPie")
+        try:
+            contextPie = paramGet.GetString("ContextPie").decode("UTF-8")
+        except AttributeError:
+            contextPie = paramGet.GetString("ContextPie")
 
         text = cBox.currentText()
 
@@ -1328,12 +1332,15 @@ def pieMenuStart():
 
                 paramIndexGet.RemGroup(a)
                 paramIndexGet.RemString(a)
+                # special case treatment                                             
                 if pie == currentPie:
                     currentPie = "Default"
                     try:
                         paramGet.SetString("CurrentPie", currentPie.encode('UTF-8'))
                     except TypeError:
                         paramGet.SetString("CurrentPie", currentPie)
+                if pie == contextPie:
+                        paramGet.RemString("ContextPie")
             else:
                 pass
 
