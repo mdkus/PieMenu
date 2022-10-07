@@ -25,7 +25,7 @@
 # http://www.freecadweb.org/wiki/index.php?title=Code_snippets
 
 global PIE_MENU_VERSION
-PIE_MENU_VERSION = "1.1.7"
+PIE_MENU_VERSION = "1.1.8"
 
 def pieMenuStart():
     import math
@@ -42,6 +42,7 @@ def pieMenuStart():
     
     # global status variables
     selectionTriggered = False
+    contextPhase = False
     
     def accessoriesMenu():
         """Add pie menu preferences to accessories menu."""
@@ -593,19 +594,19 @@ def pieMenuStart():
         def showAtMouse(self, notKeyTriggered=False):
         
             nonlocal selectionTriggered
+            nonlocal contextPhase
             global lastPosX
             global lastPosY
             
             paramGet = App.ParamGet("User parameter:BaseApp/PieMenu")
 
-            contextPhase = paramGet.GetBool("ContextPhase")
             enableContext = paramGet.GetBool("EnableContext")
 
             if contextPhase:
                 sel = Gui.Selection.getSelectionEx()
                 if not sel:
                     self.hide()
-                    paramGet.SetBool("ContextPhase", 0)
+                    contextPhase = False
                     updateCommands()
                 elif not enableContext:
                     self.hide()
@@ -783,6 +784,7 @@ def pieMenuStart():
     def listTopo():
     
         nonlocal selectionTriggered
+        nonlocal contextPhase
 
         sel = Gui.Selection.getSelectionEx()
         paramGet = App.ParamGet("User parameter:BaseApp/PieMenu")
@@ -826,7 +828,7 @@ def pieMenuStart():
                 paramGet.SetString("ContextPie", pieName.encode("UTF-8"))
             except TypeError:
                 paramGet.SetString("ContextPie", pieName)
-            paramGet.SetBool("ContextPhase", 1)
+            contextPhase = True
 
             updateCommands(context=True)
             PieMenuInstance.hide()
