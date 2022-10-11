@@ -25,7 +25,7 @@
 # http://www.freecadweb.org/wiki/index.php?title=Code_snippets
 
 global PIE_MENU_VERSION
-PIE_MENU_VERSION = "1.1.8"
+PIE_MENU_VERSION = "1.1.9"
 
 def pieMenuStart():
     import math
@@ -44,6 +44,11 @@ def pieMenuStart():
     selectionTriggered = False
     contextPhase = False
     
+    def remObsoleteParams():
+        """Remove obsolete parameters from older versions."""
+        paramGet = App.ParamGet("User parameter:BaseApp/PieMenu")
+        paramGet.RemBool("ContextPhase")
+
     def accessoriesMenu():
         """Add pie menu preferences to accessories menu."""
         pref = QtGui.QAction(mw)
@@ -2235,7 +2240,8 @@ def pieMenuStart():
             pass
 
     if start:
-    
+
+        remObsoleteParams()
         accessoriesMenu()
         compositingManager = True
         if QtCore.qVersion() < "5":
