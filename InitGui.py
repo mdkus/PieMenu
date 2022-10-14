@@ -25,7 +25,7 @@
 # http://www.freecadweb.org/wiki/index.php?title=Code_snippets
 
 global PIE_MENU_VERSION
-PIE_MENU_VERSION = "1.1.9"
+PIE_MENU_VERSION = "1.1.10"
 
 def pieMenuStart():
     import math
@@ -333,6 +333,7 @@ def pieMenuStart():
             paramGet = App.ParamGet("User parameter:BaseApp/PieMenu")
 
             paramGet.SetBool("ToolBar", False)
+            paramGet.RemString("ToolBar")
             try:
                 text = pieGroup.checkedAction().text().encode("UTF-8")
                 paramGet.SetString("CurrentPie", text)
@@ -2127,6 +2128,7 @@ def pieMenuStart():
             group.SetString("ToolList", ".,.".join(defaultTools))
 
         paramGet.SetBool("ToolBar", False)
+        paramGet.RemString("ToolBar")
         paramGet.SetString("CurrentPie", "Default")
 
         group = getGroup(mode=1)
