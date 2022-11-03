@@ -25,7 +25,7 @@
 # http://www.freecadweb.org/wiki/index.php?title=Code_snippets
 
 global PIE_MENU_VERSION
-PIE_MENU_VERSION = "1.1.10"
+PIE_MENU_VERSION = "1.1.11"
 
 def pieMenuStart():
     import math
@@ -141,7 +141,7 @@ def pieMenuStart():
 
     def radiusSize(buttonSize):
 
-        radius = str(buttonSize / 2)
+        radius = str(math.trunc(buttonSize / 2))
 
         return "QToolButton {border-radius: " + radius + "px}"
 
