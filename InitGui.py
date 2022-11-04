@@ -133,7 +133,7 @@ def pieMenuStart():
 
         """)
 
-    styleQuickMenu = ("padding: 5px")
+    styleQuickMenu = ("padding: 5px 10px 5px 10px")
 
     iconClose = path + "/Resources/icons/PieMenuClose.svg"
     iconMenu = path + "/Resources/icons/PieMenuQuickMenu.svg"
