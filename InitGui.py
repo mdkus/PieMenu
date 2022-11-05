@@ -25,7 +25,7 @@
 # http://www.freecadweb.org/wiki/index.php?title=Code_snippets
 
 global PIE_MENU_VERSION
-PIE_MENU_VERSION = "1.1.11"
+PIE_MENU_VERSION = "1.1.13"
 
 def pieMenuStart():
     import math
@@ -890,6 +890,63 @@ def pieMenuStart():
         return actions
 
 
+    def extractWorkbench(command):
+
+        cmd_parts = command.split("_")
+        return cmd_parts[0]
+
+
+    def findGuiActionByText(text):
+
+        for i in mw.findChildren(QtGui.QAction):
+            if i.text() == text:
+                return i
+
+        return None
+
+
+    def getActionData(action, actions, commands, workbenches):
+
+        if not action.icon():
+            return
+        if actions is not None:
+            actions.append(action)
+        if commands is not None and workbenches is not None:
+            command = action.objectName()
+            if len(command) == 0:
+                res = findGuiActionByText(action.text())
+                if res is not None:
+                    command = res.objectName()
+                    #Msg(res.objectName() + ": Bingo!\n")
+                    commands.append(command)
+                    workbench = extractWorkbench(command)
+                else:
+                    workbench = "None"
+            else:
+                commands.append(command)
+                workbench = extractWorkbench(command)
+
+            if not workbench in workbenches:
+                workbenches.append(workbench)
+
+
+    def getGuiToolButtonData(idToolBar, actions, commands, workbenches):
+
+        for i in mw.findChildren(QtGui.QToolBar):
+            if i.objectName() == idToolBar:
+                for a in i.findChildren(QtGui.QToolButton):
+                    try:
+                        if not a.defaultAction().isSeparator():
+                            if a.menu():
+                                for action in a.menu().actions():
+                                    getActionData(action, actions, commands, workbenches)
+                            else:
+                                action = a.defaultAction()
+                                getActionData(action, actions, commands, workbenches)
+                    except AttributeError:
+                        pass
+
+
     def updateCommands(context=False):
         paramGet = App.ParamGet("User parameter:BaseApp/PieMenu")
         paramIndexGet = App.ParamGet("User parameter:BaseApp/PieMenu/Index")
@@ -897,10 +954,9 @@ def pieMenuStart():
 
         if paramGet.GetBool("ToolBar") and context is False:
 
-            commands = []
-
             paramGet = App.ParamGet("User parameter:BaseApp/PieMenu")
             toolbar = paramGet.GetString("ToolBar")
+
             if ": " in toolbar:
                 toolbar_desc = toolbar.split(": ")
                 toolbar = toolbar_desc[1]
@@ -916,28 +972,15 @@ def pieMenuStart():
                 Gui.activateWorkbench(lastWorkbench.__class__.__name__)
             else:
                 pass
-            for i in mw.findChildren(QtGui.QToolBar):
-                if i.objectName() == toolbar:
-                    for a in i.findChildren(QtGui.QToolButton):
-                        try:
-                            if not a.defaultAction().isSeparator():
-                                if a.menu():
-                                    for b in a.menu().actions():
-                                        commands.append(b)
-                                else:
-                                    commands.append(a.defaultAction())
-                            else:
-                                pass
-                        except AttributeError:
-                            pass
-                else:
-                    pass
 
-            for com in commands:
-                if not com.icon():
-                    commands.remove(com)
-                else:
-                    pass
+            actions = []
+            getGuiToolButtonData(toolbar, actions, None, None)
+
+#            for com in commands:
+#                if not com.icon():
+#                    commands.remove(com)
+#                else:
+#                    pass
         else:
 
             if indexList:
@@ -982,19 +1025,19 @@ def pieMenuStart():
             else:
                 toolList = []
 
-            commands = []
+            actions = []
 
             actionList = getActionList()
             lastWorkbench = Gui.activeWorkbench()
             
-            while getCommands(commands, toolList, actionList):
+            while getCommands(actions, toolList, actionList):
                 actionList = getActionList()
             else:
                 pass
 
             Gui.activateWorkbench(lastWorkbench.__class__.__name__)
 
-        PieMenuInstance.add_commands(commands, context)
+        PieMenuInstance.add_commands(actions, context)
 
     def getCommands(commands, toolList, actionList):
 
