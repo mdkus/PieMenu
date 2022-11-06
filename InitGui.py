@@ -25,7 +25,7 @@
 # http://www.freecadweb.org/wiki/index.php?title=Code_snippets
 
 global PIE_MENU_VERSION
-PIE_MENU_VERSION = "1.1.13"
+PIE_MENU_VERSION = "1.1.14"
 
 def pieMenuStart():
     import math
@@ -864,7 +864,7 @@ def pieMenuStart():
             Gui.Selection.removeObserver(selObserver)
 
 
-    def getActionList():
+    def getGuiActionMapAll():
 
         actions = {}
         duplicates = []
@@ -917,7 +917,6 @@ def pieMenuStart():
                 res = findGuiActionByText(action.text())
                 if res is not None:
                     command = res.objectName()
-                    #Msg(res.objectName() + ": Bingo!\n")
                     commands.append(command)
                     workbench = extractWorkbench(command)
                 else:
@@ -945,6 +944,30 @@ def pieMenuStart():
                                 getActionData(action, actions, commands, workbenches)
                     except AttributeError:
                         pass
+
+
+    def actualizeWorkbenchActions(actions, toolList, actionMap):
+        for i in toolList:
+            # rule out special case: there has to be an entry
+            if i == "":
+                pass
+            elif i in actionMap:
+                if not actionMap[i] in actions:
+                    actions.append(actionMap[i])
+            else:
+                cmd_parts = i.split("_")
+                # rule out special case: unknown Std action
+                if cmd_parts[0] == "Std":
+                    pass
+                else:
+                    if cmd_parts[0] == "FEM":
+                        cmd_parts[0] = "Fem"
+                    cmdWb = cmd_parts[0] + "Workbench"
+                    # after workbench activation actionMap has to be actualized
+                    Gui.activateWorkbench(cmdWb)
+                    return True
+                
+        return False
 
 
     def updateCommands(context=False):
@@ -976,11 +999,6 @@ def pieMenuStart():
             actions = []
             getGuiToolButtonData(toolbar, actions, None, None)
 
-#            for com in commands:
-#                if not com.icon():
-#                    commands.remove(com)
-#                else:
-#                    pass
         else:
 
             if indexList:
@@ -1027,11 +1045,11 @@ def pieMenuStart():
 
             actions = []
 
-            actionList = getActionList()
+            actionMapAll = getGuiActionMapAll()
             lastWorkbench = Gui.activeWorkbench()
             
-            while getCommands(actions, toolList, actionList):
-                actionList = getActionList()
+            while actualizeWorkbenchActions(actions, toolList, actionMapAll):
+                actionMapAll = getGuiActionMapAll()
             else:
                 pass
 
@@ -1039,24 +1057,6 @@ def pieMenuStart():
 
         PieMenuInstance.add_commands(actions, context)
 
-    def getCommands(commands, toolList, actionList):
-
-        for i in toolList:
-            if i in actionList:
-                if not actionList[i] in commands:
-                    commands.append(actionList[i])
-                else:
-                    pass
-            else:
-                cmd_parts = i.split("_")
-                # treatment of special cases
-                if cmd_parts[0] == "FEM":
-                    cmd_parts[0] = "Fem"
-                cmdWb = cmd_parts[0] + "Workbench"
-                Gui.activateWorkbench(cmdWb)
-                return True
-                
-        return False
 
     def getGroup(mode=0):
         paramGet = App.ParamGet("User parameter:BaseApp/PieMenu")
@@ -1129,7 +1129,7 @@ def pieMenuStart():
         else:
             toolList = []
 
-        actionList = getActionList()
+        actionMapAll = getGuiActionMapAll()
 
         buttonListWidget.blockSignals(True)
 
@@ -1139,28 +1139,36 @@ def pieMenuStart():
         lastWorkbench = Gui.activeWorkbench()
 
         for i in toolList:
-            if i not in actionList:
-                cmd_parts = i.split("_")
-                if cmd_parts[0] not in workbenches:
-                    # treatment of special cases
-                    if cmd_parts[0] == "FEM":
-                        cmd_parts[0] = "Fem"
-                    workbenches.append(cmd_parts[0])
-                    Gui.activateWorkbench(cmd_parts[0] + "Workbench")
-                else:
+            if i not in actionMapAll:
+                # rule out special case: there has to be an entry
+                if i == "":
                     pass
+                else:
+                    cmd_parts = i.split("_")
+                    if cmd_parts[0] not in workbenches:
+                        # rule out special case: unknown Std action
+                        if cmd_parts[0] == "Std":
+                            pass
+                        else:
+                            # treatment of special cases
+                            if cmd_parts[0] == "FEM":
+                                cmd_parts[0] = "Fem"
+                            workbenches.append(cmd_parts[0])
+                            Gui.activateWorkbench(cmd_parts[0] + "Workbench")
+                    else:
+                        pass
             else:
                 pass
 
         Gui.activateWorkbench(lastWorkbench.__class__.__name__)
-        actionList = getActionList()
+        actionMapAll = getGuiActionMapAll()
 
         for i in toolList:
-            if i in actionList:
+            if i in actionMapAll:
                 item = QtGui.QListWidgetItem(buttonListWidget)
                 item.setData(QtCore.Qt.UserRole, i)
-                item.setText(actionList[i].text().replace("&", ""))
-                item.setIcon(actionList[i].icon())
+                item.setText(actionMapAll[i].text().replace("&", ""))
+                item.setIcon(actionMapAll[i].icon())
             else:
                 pass
 
@@ -1603,17 +1611,17 @@ def pieMenuStart():
 
         text = cBox.currentText()
 
-        toolListAll = getActionList()
+        actionMapAll = getGuiActionMapAll()
 
         toolListWidget.blockSignals(True)
         toolListWidget.clear()
 
-        for i in toolListAll:
+        for i in actionMapAll:
             item = QtGui.QListWidgetItem(toolListWidget)
-            item.setText(toolListAll[i].text().replace("&", ""))
-            item.setIcon(toolListAll[i].icon())
+            item.setText(actionMapAll[i].text().replace("&", ""))
+            item.setIcon(actionMapAll[i].icon())
             item.setCheckState(QtCore.Qt.CheckState(0))
-            item.setData(QtCore.Qt.UserRole, toolListAll[i].objectName())
+            item.setData(QtCore.Qt.UserRole, actionMapAll[i].objectName())
 
         if indexList:
             indexList = indexList.split(".,.")
