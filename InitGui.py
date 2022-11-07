@@ -25,7 +25,7 @@
 # http://www.freecadweb.org/wiki/index.php?title=Code_snippets
 
 global PIE_MENU_VERSION
-PIE_MENU_VERSION = "1.1.15"
+PIE_MENU_VERSION = "1.1.16"
 
 def pieMenuStart():
     import math
@@ -398,27 +398,7 @@ def pieMenuStart():
             text = toolbarGroup.checkedAction().data()
 
             workbenches = []
-            for i in mw.findChildren(QtGui.QToolBar):
-                if i.objectName() == text:
-                    for a in i.findChildren(QtGui.QToolButton):
-                        try:
-                            if not a.defaultAction().isSeparator():
-                                action = a.defaultAction().objectName()
-                                if len(action) == 0:
-                                    workbench = "None"
-                                else:
-                                    cmd_parts = action.split("_")
-                                    workbench = cmd_parts[0]
-                                if not workbench in workbenches:
-                                    workbenches.append(workbench)
-                                else:
-                                    pass
-                            else:
-                                pass
-                        except AttributeError:
-                            pass
-                else:
-                    pass
+            getGuiToolButtonData(text, None, None, workbenches)
 
             toolbar_desc = ", ".join(workbenches)
             toolbar_desc = toolbar_desc + ': ' + text
@@ -911,20 +891,23 @@ def pieMenuStart():
             return
         if actions is not None:
             actions.append(action)
-        if commands is not None and workbenches is not None:
-            command = action.objectName()
-            if len(command) == 0:
-                res = findGuiActionByText(action.text())
-                if res is not None:
-                    command = res.objectName()
+        #if commands is not None and workbenches is not None:
+        command = action.objectName()
+        if len(command) == 0:
+            res = findGuiActionByText(action.text())
+            if res is not None:
+                command = res.objectName()
+                if commands is not None:
                     commands.append(command)
-                    workbench = extractWorkbench(command)
-                else:
-                    workbench = "None"
-            else:
-                commands.append(command)
                 workbench = extractWorkbench(command)
+            else:
+                workbench = "None"
+        else:
+            if commands is not None:
+                commands.append(command)
+            workbench = extractWorkbench(command)
 
+        if workbenches is not None:
             if not workbench in workbenches:
                 workbenches.append(workbench)
 
