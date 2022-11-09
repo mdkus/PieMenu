@@ -25,7 +25,7 @@
 # http://www.freecadweb.org/wiki/index.php?title=Code_snippets
 
 global PIE_MENU_VERSION
-PIE_MENU_VERSION = "1.1.16"
+PIE_MENU_VERSION = "1.1.17"
 
 def pieMenuStart():
     import math
@@ -873,7 +873,12 @@ def pieMenuStart():
     def extractWorkbench(command):
 
         cmd_parts = command.split("_")
-        return cmd_parts[0]
+        if cmd_parts[0] == "":
+            workbench = "None"
+        else:
+            workbench = cmd_parts[0]
+
+        return workbench
 
 
     def findGuiActionByText(text):
