@@ -25,7 +25,7 @@
 # http://www.freecadweb.org/wiki/index.php?title=Code_snippets
 
 global PIE_MENU_VERSION
-PIE_MENU_VERSION = "1.1.17"
+PIE_MENU_VERSION = "1.1.18"
 
 def pieMenuStart():
     import math
@@ -43,6 +43,9 @@ def pieMenuStart():
     # global status variables
     selectionTriggered = False
     contextPhase = False
+    
+    # global action map
+    actionMapAll = None
     
     def remObsoleteParams():
         """Remove obsolete parameters from older versions."""
@@ -883,9 +886,11 @@ def pieMenuStart():
 
     def findGuiActionByText(text):
 
-        for i in mw.findChildren(QtGui.QAction):
-            if i.text() == text:
-                return i
+        nonlocal actionMapAll
+
+        for i in actionMapAll:
+            if actionMapAll[i].text() == text:
+                return actionMapAll[i]
 
         return None
 
@@ -918,6 +923,9 @@ def pieMenuStart():
 
 
     def getGuiToolButtonData(idToolBar, actions, commands, workbenches):
+
+        nonlocal actionMapAll
+        actionMapAll = getGuiActionMapAll()
 
         for i in mw.findChildren(QtGui.QToolBar):
             if i.objectName() == idToolBar:
@@ -960,6 +968,9 @@ def pieMenuStart():
 
 
     def updateCommands(context=False):
+
+        nonlocal actionMapAll
+
         paramGet = App.ParamGet("User parameter:BaseApp/PieMenu")
         paramIndexGet = App.ParamGet("User parameter:BaseApp/PieMenu/Index")
         indexList = paramIndexGet.GetString("IndexList")
@@ -1114,8 +1125,10 @@ def pieMenuStart():
 
 
     def buttonList():
-        group = getGroup()
 
+        nonlocal actionMapAll
+
+        group = getGroup()
         toolList = group.GetString("ToolList")
 
         if toolList:
@@ -1600,6 +1613,9 @@ def pieMenuStart():
 
 
     def toolList():
+
+        nonlocal actionMapAll
+        
         paramIndexGet = App.ParamGet("User parameter:BaseApp/PieMenu/Index")
         indexList = paramIndexGet.GetString("IndexList")
 
