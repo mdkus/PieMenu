@@ -25,7 +25,7 @@
 # http://www.freecadweb.org/wiki/index.php?title=Code_snippets
 
 global PIE_MENU_VERSION
-PIE_MENU_VERSION = "1.1.18"
+PIE_MENU_VERSION = "1.1.19"
 
 def pieMenuStart():
     import math
@@ -43,9 +43,6 @@ def pieMenuStart():
     # global status variables
     selectionTriggered = False
     contextPhase = False
-    
-    # global action map
-    actionMapAll = None
     
     def remObsoleteParams():
         """Remove obsolete parameters from older versions."""
@@ -884,37 +881,27 @@ def pieMenuStart():
         return workbench
 
 
-    def findGuiActionByText(text):
-
-        nonlocal actionMapAll
-
-        for i in actionMapAll:
-            if actionMapAll[i].text() == text:
-                return actionMapAll[i]
-
-        return None
-
-
     def getActionData(action, actions, commands, workbenches):
 
         if not action.icon():
             return
         if actions is not None:
-            actions.append(action)
-        #if commands is not None and workbenches is not None:
+            if action in actions:
+                pass
+            else:
+                actions.append(action)
+        if commands is None and workbenches is None:
+            return
+
         command = action.objectName()
         if len(command) == 0:
-            res = findGuiActionByText(action.text())
-            if res is not None:
-                command = res.objectName()
-                if commands is not None:
-                    commands.append(command)
-                workbench = extractWorkbench(command)
-            else:
-                workbench = "None"
+            workbench = "None"
         else:
             if commands is not None:
-                commands.append(command)
+                if command in commands:
+                    pass
+                else:
+                    commands.append(command)
             workbench = extractWorkbench(command)
 
         if workbenches is not None:
@@ -924,22 +911,12 @@ def pieMenuStart():
 
     def getGuiToolButtonData(idToolBar, actions, commands, workbenches):
 
-        nonlocal actionMapAll
         actionMapAll = getGuiActionMapAll()
-
-        for i in mw.findChildren(QtGui.QToolBar):
-            if i.objectName() == idToolBar:
-                for a in i.findChildren(QtGui.QToolButton):
-                    try:
-                        if not a.defaultAction().isSeparator():
-                            if a.menu():
-                                for action in a.menu().actions():
-                                    getActionData(action, actions, commands, workbenches)
-                            else:
-                                action = a.defaultAction()
-                                getActionData(action, actions, commands, workbenches)
-                    except AttributeError:
-                        pass
+        for i in actionMapAll:
+            action = actionMapAll[i]
+            for widgets in action.associatedWidgets():
+                if widgets.objectName() == idToolBar:
+                    getActionData(action, actions, commands, workbenches)
 
 
     def actualizeWorkbenchActions(actions, toolList, actionMap):
@@ -968,8 +945,6 @@ def pieMenuStart():
 
 
     def updateCommands(context=False):
-
-        nonlocal actionMapAll
 
         paramGet = App.ParamGet("User parameter:BaseApp/PieMenu")
         paramIndexGet = App.ParamGet("User parameter:BaseApp/PieMenu/Index")
@@ -1125,8 +1100,6 @@ def pieMenuStart():
 
 
     def buttonList():
-
-        nonlocal actionMapAll
 
         group = getGroup()
         toolList = group.GetString("ToolList")
@@ -1614,8 +1587,6 @@ def pieMenuStart():
 
     def toolList():
 
-        nonlocal actionMapAll
-        
         paramIndexGet = App.ParamGet("User parameter:BaseApp/PieMenu/Index")
         indexList = paramIndexGet.GetString("IndexList")
 
@@ -2296,8 +2267,8 @@ def pieMenuStart():
     mw = Gui.getMainWindow()
     start = True
 
-    for act in mw.findChildren(QtGui.QAction):
-        if act.objectName() == "PieMenuShortCut":
+    for action in mw.findChildren(QtGui.QAction):
+        if action.objectName() == "PieMenuShortCut":
             start = False
         else:
             pass
