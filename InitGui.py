@@ -25,7 +25,7 @@
 # http://www.freecadweb.org/wiki/index.php?title=Code_snippets
 
 global PIE_MENU_VERSION
-PIE_MENU_VERSION = "1.1.19"
+PIE_MENU_VERSION = "1.2.0"
 
 def pieMenuStart():
     import math
@@ -43,7 +43,7 @@ def pieMenuStart():
     # global status variables
     selectionTriggered = False
     contextPhase = False
-    
+
     def remObsoleteParams():
         """Remove obsolete parameters from older versions."""
         paramGet = App.ParamGet("User parameter:BaseApp/PieMenu")
@@ -228,8 +228,10 @@ def pieMenuStart():
         menuToolBar = QtGui.QMenu()
         menuToolBar.setTitle("ToolBar")
 
-        toolbarGroup = QtGui.QActionGroup(menuToolBar)
-        toolbarGroup.setExclusive(True)
+        toolbarGroup = QtGui.QMenu()
+
+        toolbarGroupOps = QtGui.QActionGroup(toolbarGroup)
+        toolbarGroupOps.setExclusive(True)
 
         prefAction = QtGui.QAction(menu)
         prefAction.setIconText("Preferences")
@@ -375,37 +377,72 @@ def pieMenuStart():
                         pass
 
                 if len(commands) != 0:
-                    action = QtGui.QAction(toolbarGroup)
-                    action.setText(i.windowTitle())
-                    action.setData(i.objectName())
-                    action.setCheckable(True)
-                    menuToolBar.addAction(action)
-
-                    if i.objectName() == text:
-                        action.setChecked(True)
-                    else:
-                        pass
-
+                    menu = QtGui.QMenu(i.windowTitle())
+                    menu.aboutToShow.connect(lambda sender=menu: onMenuToolbarGroup(sender))
+                    menuToolBar.addMenu(menu)
                 else:
                     pass
 
         menuToolBar.aboutToShow.connect(onMenuToolBar)
 
-        def onToolbarGroup():
+        def isActualPie(text):
+
             paramGet = App.ParamGet("User parameter:BaseApp/PieMenu")
+            if paramGet.GetBool("ToolBar"):
+                entry = paramGet.GetString("ToolBar")
+                if ": " in entry:
+                    toolbar_desc = entry.split(": ")
+                    idMenu = toolbar_desc[1]
+                else:
+                    idMenu = entry
+                if idMenu == text:
+                    return True;
 
-            paramGet.SetBool("ToolBar", True)
-            text = toolbarGroup.checkedAction().data()
+            return False
 
+        def onMenuToolbarGroup(sender):
+
+            if not sender.actions():
+                action = QtGui.QAction(sender)
+                action.setText("Show")
+                action.setData(sender.title())
+                action.setCheckable(True)
+                if isActualPie(sender.title()):
+                    action.setChecked(True)
+                sender.addAction(action)
+
+                action = QtGui.QAction(sender)
+                action.setText("Save")
+                action.setData(sender.title())
+                sender.addAction(action)
+
+                sender.triggered.connect(lambda sender: onToolbarGroup(sender))
+
+        def onToolbarGroup(sender):
+                                                                     
+            paramGet = App.ParamGet("User parameter:BaseApp/PieMenu")
+            if sender.text() == "Show":
+                paramGet.SetBool("ToolBar", True)
+            elif sender.text() == "Save":
+                newPieGroup = createPie(sender.data())
+            else:
+                return
+                
             workbenches = []
-            getGuiToolButtonData(text, None, None, workbenches)
+            commands = []
 
-            toolbar_desc = ", ".join(workbenches)
-            toolbar_desc = toolbar_desc + ': ' + text
-            paramGet.SetString("ToolBar", toolbar_desc)
-            
-            PieMenuInstance.hide()
-            PieMenuInstance.showAtMouse(notKeyTriggered=True)
+            if sender.text() == "Save":
+                # write persistent commands
+                getGuiToolButtonData(sender.data(), None, commands, None)
+                newPieGroup.SetString("ToolList", ".,.".join(commands))
+            elif sender.text() == "Show":
+                # write persistent toolbar and its workbenches
+                getGuiToolButtonData(sender.data(), None, None, workbenches)
+                toolbar_desc = ", ".join(workbenches)
+                toolbar_desc = toolbar_desc + ': ' + sender.data()
+                paramGet.SetString("ToolBar", toolbar_desc)            
+                PieMenuInstance.hide()
+                PieMenuInstance.showAtMouse(notKeyTriggered=True)                   
 
         toolbarGroup.triggered.connect(onToolbarGroup)
 
@@ -1275,12 +1312,12 @@ def pieMenuStart():
         return indexList
 
 
-    def onButtonAddPieMenu():
+    def createPie(text):
 
-        text, ok = inputTextDialog("New menu")
-        if not ok:
-            return
-                
+                                              
+                  
+                  
+
         paramIndexGet = App.ParamGet("User parameter:BaseApp/PieMenu/Index")
         indexList = paramIndexGet.GetString("IndexList")
         indexList = splitIndexList(indexList)
@@ -1325,6 +1362,18 @@ def pieMenuStart():
                     paramIndexGet.SetString(indexNumber, text)
 
             cBoxUpdate()
+
+        return paramIndexGet.GetGroup(indexNumber)
+
+
+    def onButtonAddPieMenu():
+
+        text, ok = inputTextDialog("New menu")
+        if not ok:
+            return
+                
+        createPie(text)
+                
 
     buttonAddPieMenu.clicked.connect(onButtonAddPieMenu)
 
