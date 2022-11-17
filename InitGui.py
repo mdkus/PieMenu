@@ -25,7 +25,7 @@
 # http://www.freecadweb.org/wiki/index.php?title=Code_snippets
 
 global PIE_MENU_VERSION
-PIE_MENU_VERSION = "1.2.0"
+PIE_MENU_VERSION = "1.2.1"
 
 def pieMenuStart():
     import math
@@ -135,8 +135,14 @@ def pieMenuStart():
 
     styleQuickMenu = ("padding: 5px 10px 5px 10px")
 
-    iconClose = path + "/Resources/icons/PieMenuClose.svg"
-    iconMenu = path + "/Resources/icons/PieMenuQuickMenu.svg"
+    iconClose = respath + "PieMenuClose.svg"
+    iconMenu = respath + "PieMenuQuickMenu.svg"
+    iconUp = respath + "PieMenuUp.svg"
+    iconDown = respath + "PieMenuDown.svg"
+    iconAdd = respath + "PieMenuAdd.svg"
+    iconRemove = respath + "PieMenuRemove.svg"
+    iconRename = respath + "PieMenuRename.svg"
+    iconCopy = respath + "PieMenuCopy.svg"
 
 
     def radiusSize(buttonSize):
@@ -1244,7 +1250,7 @@ def pieMenuStart():
     cBox.currentIndexChanged.connect(onPieChange)
 
     buttonAddPieMenu = QtGui.QToolButton()
-    buttonAddPieMenu.setText("+")
+    buttonAddPieMenu.setIcon(QtGui.QIcon(iconAdd))
     buttonAddPieMenu.setToolTip("Add new pie menu")
     buttonAddPieMenu.setMinimumHeight(30)
     buttonAddPieMenu.setMinimumWidth(30)
@@ -1378,7 +1384,7 @@ def pieMenuStart():
     buttonAddPieMenu.clicked.connect(onButtonAddPieMenu)
 
     buttonRemovePieMenu = QtGui.QToolButton()
-    buttonRemovePieMenu.setText("-")
+    buttonRemovePieMenu.setIcon(QtGui.QIcon(iconRemove))
     buttonRemovePieMenu.setToolTip("Remove current pie menu")
     buttonRemovePieMenu.setMinimumHeight(30)
     buttonRemovePieMenu.setMinimumWidth(30)
@@ -1444,7 +1450,7 @@ def pieMenuStart():
 
     buttonRenamePieMenu = QtGui.QToolButton()
     buttonRenamePieMenu.setToolTip("Rename current pie menu")
-    buttonRenamePieMenu.setIcon(QtGui.QIcon(respath + "PieMenuRename.svg"))
+    buttonRenamePieMenu.setIcon(QtGui.QIcon(iconRename))
     buttonRenamePieMenu.setMinimumHeight(30)
     buttonRenamePieMenu.setMinimumWidth(30)
     
@@ -1489,7 +1495,7 @@ def pieMenuStart():
     
     buttonCopyPieMenu = QtGui.QToolButton()
     buttonCopyPieMenu.setToolTip("Copy current pie menu")
-    buttonCopyPieMenu.setIcon(QtGui.QIcon(respath + "PieMenuCopy.svg"))
+    buttonCopyPieMenu.setIcon(QtGui.QIcon(iconCopy))
     buttonCopyPieMenu.setMinimumHeight(30)
     buttonCopyPieMenu.setMinimumWidth(30)
 
@@ -1777,7 +1783,8 @@ def pieMenuStart():
     toolListWidget.itemChanged.connect(onToolListWidget)
 
     buttonUp = QtGui.QToolButton()
-    buttonUp.setArrowType(QtCore.Qt.ArrowType(1))
+    buttonUp.setIcon(QtGui.QIcon(iconUp))
+    buttonUp.setToolTip("Move selected command up")
     buttonUp.setMinimumHeight(30)
     buttonUp.setMinimumWidth(30)
 
@@ -1808,7 +1815,8 @@ def pieMenuStart():
     buttonUp.clicked.connect(onButtonUp)
 
     buttonDown = QtGui.QToolButton()
-    buttonDown.setArrowType(QtCore.Qt.DownArrow)
+    buttonDown.setIcon(QtGui.QIcon(iconDown))
+    buttonDown.setToolTip("Move selected command down")
     buttonDown.setMinimumHeight(30)
     buttonDown.setMinimumWidth(30)
 
