@@ -25,7 +25,7 @@
 # http://www.freecadweb.org/wiki/index.php?title=Code_snippets
 
 global PIE_MENU_VERSION
-PIE_MENU_VERSION = "1.2.1"
+PIE_MENU_VERSION = "1.2.2"
 
 def pieMenuStart():
     import math
@@ -143,6 +143,7 @@ def pieMenuStart():
     iconRemove = respath + "PieMenuRemove.svg"
     iconRename = respath + "PieMenuRename.svg"
     iconCopy = respath + "PieMenuCopy.svg"
+    iconRemoveCommand = respath + "PieMenuRemoveCommand.svg"
 
 
     def radiusSize(buttonSize):
@@ -1781,6 +1782,21 @@ def pieMenuStart():
         buttonList()
 
     toolListWidget.itemChanged.connect(onToolListWidget)
+    
+
+    def buttonList2ToolList(buttonListWidget):
+
+        items = []
+        for index in range(buttonListWidget.count()):
+            items.append(buttonListWidget.item(index))
+
+        toolData = []
+        for i in items:
+            toolData.append(i.data(QtCore.Qt.UserRole))
+
+        group = getGroup()
+        group.SetString("ToolList", ".,.".join(toolData))
+
 
     buttonUp = QtGui.QToolButton()
     buttonUp.setIcon(QtGui.QIcon(iconUp))
@@ -1796,22 +1812,8 @@ def pieMenuStart():
             currentItem = buttonListWidget.takeItem(currentIndex)
             buttonListWidget.insertItem(currentIndex - 1, currentItem)
             buttonListWidget.setCurrentRow(currentIndex - 1)
-
-            items = []
-            for index in range(buttonListWidget.count()):
-                items.append(buttonListWidget.item(index))
-
-            toolData = []
-            for i in items:
-                toolData.append(i.data(QtCore.Qt.UserRole))
-
-            group = getGroup()
-
-            group.SetString("ToolList", ".,.".join(toolData))
-
-        else:
-            pass
-
+            buttonList2ToolList(buttonListWidget)
+                                                          
     buttonUp.clicked.connect(onButtonUp)
 
     buttonDown = QtGui.QToolButton()
@@ -1828,23 +1830,28 @@ def pieMenuStart():
             currentItem = buttonListWidget.takeItem(currentIndex)
             buttonListWidget.insertItem(currentIndex + 1, currentItem)
             buttonListWidget.setCurrentRow(currentIndex + 1)
-
-            items = []
-            for index in range(buttonListWidget.count()):
-                items.append(buttonListWidget.item(index))
-
-            toolData = []
-            for i in items:
-                toolData.append(i.data(QtCore.Qt.UserRole))
-
-            group = getGroup()
-
-            group.SetString("ToolList", ".,.".join(toolData))
-
-        else:
-            pass
+            buttonList2ToolList(buttonListWidget)
 
     buttonDown.clicked.connect(onButtonDown)
+
+    buttonRemoveCommand = QtGui.QPushButton()
+    buttonRemoveCommand.setIcon(QtGui.QIcon(iconRemoveCommand))
+    buttonRemoveCommand.setToolTip("Remove selected command")
+    buttonRemoveCommand.setMinimumHeight(30)
+    buttonRemoveCommand.setMinimumWidth(30)
+
+
+    def onButtonRemoveCommand():
+
+        currentIndex = buttonListWidget.currentRow()
+        buttonListWidget.takeItem(currentIndex)
+
+        if currentIndex != 0:
+            buttonListWidget.setCurrentRow(currentIndex - 1)
+        buttonListWidget.setFocus()
+        buttonList2ToolList(buttonListWidget)
+
+    buttonRemoveCommand.clicked.connect(onButtonRemoveCommand)
 
     vertexItem = QtGui.QTableWidgetItem()
     vertexItem.setText("Vertex")
@@ -2294,6 +2301,7 @@ def pieMenuStart():
 
         buttonsLayout = QtGui.QHBoxLayout()
         buttonsLayout.addStretch(1)
+        buttonsLayout.addWidget(buttonRemoveCommand)
         buttonsLayout.addWidget(buttonDown)
         buttonsLayout.addWidget(buttonUp)
 
