@@ -25,7 +25,7 @@
 # http://www.freecadweb.org/wiki/index.php?title=Code_snippets
 
 global PIE_MENU_VERSION
-PIE_MENU_VERSION = "1.2.2"
+PIE_MENU_VERSION = "1.2.3"
 
 def pieMenuStart():
     import math
@@ -135,6 +135,13 @@ def pieMenuStart():
 
     styleQuickMenu = ("padding: 5px 10px 5px 10px")
 
+    styleQuickMenuItem = ("""
+        QMenu::item {
+            padding: 5px 20px 5px 20px;
+        }
+        
+        """)
+        
     iconClose = respath + "PieMenuClose.svg"
     iconMenu = respath + "PieMenuQuickMenu.svg"
     iconUp = respath + "PieMenuUp.svg"
@@ -234,6 +241,7 @@ def pieMenuStart():
 
         menuToolBar = QtGui.QMenu()
         menuToolBar.setTitle("ToolBar")
+        menuToolBar.setStyleSheet(styleQuickMenuItem)
 
         toolbarGroup = QtGui.QMenu()
 
