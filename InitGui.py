@@ -25,7 +25,7 @@
 # http://www.freecadweb.org/wiki/index.php?title=Code_snippets
 
 global PIE_MENU_VERSION
-PIE_MENU_VERSION = "1.2.4"
+PIE_MENU_VERSION = "1.2.5"
 
 def pieMenuStart():
     import math
@@ -986,8 +986,13 @@ def pieMenuStart():
                     pass
                 else:
                     # match special cases
+                    # Fem workbench
                     if cmd_parts[0] == "FEM":
                         cmd_parts[0] = "Fem"
+                    # Sheet Metal workbench
+                    if cmd_parts[0][:2] == "SM":
+                        cmd_parts[0] = cmd_parts[0][:2]
+
                     cmdWb = cmd_parts[0] + "Workbench"
                     # after workbench activation actionMap has to be actualized
                     Gui.activateWorkbench(cmdWb)
@@ -1020,8 +1025,13 @@ def pieMenuStart():
                         pass
                     else:
                         # match special cases
+                        # Fem workbench
                         if i == "FEM":
                             i = "Fem"
+                        # Sheet Metal workbench
+                        if i[:2] == "SM":
+                            i = i[:2]
+
                         Gui.activateWorkbench(i + "Workbench")
 
                 Gui.activateWorkbench(lastWorkbench.__class__.__name__)
@@ -1183,8 +1193,12 @@ def pieMenuStart():
                             pass
                         else:
                             # treatment of special cases
+                            # Fem workbench
                             if cmd_parts[0] == "FEM":
                                 cmd_parts[0] = "Fem"
+                            # Sheet Metal workbench
+                            if cmd_parts[0][:2] == "SM":
+                                cmd_parts[0] = cmd_parts[0][:2]
                             workbenches.append(cmd_parts[0])
                             Gui.activateWorkbench(cmd_parts[0] + "Workbench")
                     else:
