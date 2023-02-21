@@ -25,7 +25,7 @@
 # http://www.freecadweb.org/wiki/index.php?title=Code_snippets
 
 global PIE_MENU_VERSION
-PIE_MENU_VERSION = "1.2.5"
+PIE_MENU_VERSION = "1.2.6"
 
 def pieMenuStart():
     import math
@@ -1886,6 +1886,7 @@ def pieMenuStart():
             buttonListWidget.setCurrentRow(currentIndex - 1)
         buttonListWidget.setFocus()
         buttonList2ToolList(buttonListWidget)
+        toolList()
 
     buttonRemoveCommand.clicked.connect(onButtonRemoveCommand)
 
