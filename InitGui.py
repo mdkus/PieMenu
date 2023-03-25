@@ -1,6 +1,6 @@
 # PieMenu widget for FreeCAD
 #
-# Copyright (C) 2022 mdkus @ FreeCAD
+# Copyright (C) 2022, 2023 mdkus @ FreeCAD
 # Copyright (C) 2016, 2017 triplus @ FreeCAD
 # Copyright (C) 2015,2016 looo @ FreeCAD
 # Copyright (C) 2015 microelly <microelly2@freecadbuch.de>
@@ -25,7 +25,7 @@
 # http://www.freecadweb.org/wiki/index.php?title=Code_snippets
 
 global PIE_MENU_VERSION
-PIE_MENU_VERSION = "1.2.6"
+PIE_MENU_VERSION = "1.2.7"
 
 def pieMenuStart():
     import math
@@ -2366,6 +2366,24 @@ def pieMenuStart():
 
         cBoxUpdate()
 
+
+    def addAccessoriesMenu():
+    
+        if mw.property("eventLoop"):
+        
+            startAM = False
+            try:
+                mw.mainWindowClosed
+                mw.workbenchActivated
+                startAM = True
+            except AttributeError:
+                pass
+            if startAM:
+                t.stop()
+                t.deleteLater()
+                accessoriesMenu()
+
+
     mw = Gui.getMainWindow()
     start = True
 
@@ -2378,7 +2396,6 @@ def pieMenuStart():
     if start:
 
         remObsoleteParams()
-        accessoriesMenu()
         compositingManager = True
         if QtCore.qVersion() < "5":
             windowShadow = False
@@ -2414,6 +2431,11 @@ def pieMenuStart():
         actionKey.setShortcut(QtGui.QKeySequence("TAB"))
         actionKey.triggered.connect(PieMenuInstance.showAtMouse)
         mw.addAction(actionKey)
+
+        # let the addition of the accessoriesMenu wait until FC is ready for it
+        t = QtCore.QTimer()
+        t.timeout.connect(addAccessoriesMenu)
+        t.start(500)
 
     else:
         pass
