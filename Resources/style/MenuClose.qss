@@ -1,0 +1,10 @@
+QToolButton {
+    background-color: rgba(60,60,60,255);
+    color: silver;
+    border: 1px solid #1e1e1e;
+}
+
+QToolButton::menu-indicator {
+    image: none;
+}
+

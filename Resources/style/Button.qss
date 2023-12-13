@@ -1,0 +1,22 @@
+QToolButton {
+    background-color: lightGray;
+    border: 1px outset silver;
+}
+
+QToolButton:disabled {
+    background-color: darkGray;
+}
+
+QToolButton:hover {
+    background-color: lightBlue;
+}
+
+QToolButton:checked {
+    background-color: lightGreen;
+}
+
+QToolButton::menu-indicator {
+    subcontrol-origin: padding;
+    subcontrol-position: center center;
+}
+

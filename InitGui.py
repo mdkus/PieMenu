@@ -37,12 +37,37 @@ def pieMenuStart():
     from PySide import QtGui
     import PieMenuLocator as locator
 
-    path = locator.path()
-    respath = path + "/Resources/icons/"
-    
     # global status variables
     selectionTriggered = False
     contextPhase = False
+
+    path = locator.path()
+    respath = path + "/Resources/icons/"
+    stylePath = path + "/Resources/style/"
+
+    with open(stylePath + "Button.qss", "r") as file:
+        styleButton = file.read()
+    with open(stylePath + "MenuClose.qss", "r") as file:
+        styleMenuClose = file.read()
+    with open(stylePath + "Container.qss", "r") as file:
+        styleContainer = file.read()
+    with open(stylePath + "Combo.qss", "r") as file:
+        styleCombo = file.read()
+    with open(stylePath + "QuickMenu.qss", "r") as file:
+        styleQuickMenu = file.read()
+    with open(stylePath + "QuickMenuItem.qss", "r") as file:
+        styleQuickMenuItem = file.read()
+
+    iconClose = respath + "PieMenuClose.svg"
+    iconMenu = respath + "PieMenuQuickMenu.svg"
+    iconUp = respath + "PieMenuUp.svg"
+    iconDown = respath + "PieMenuDown.svg"
+    iconAdd = respath + "PieMenuAdd.svg"
+    iconRemove = respath + "PieMenuRemove.svg"
+    iconRename = respath + "PieMenuRename.svg"
+    iconCopy = respath + "PieMenuCopy.svg"
+    iconRemoveCommand = respath + "PieMenuRemoveCommand.svg"
+
 
     def remObsoleteParams():
         """Remove obsolete parameters from older versions."""
@@ -78,79 +103,11 @@ def pieMenuStart():
 
                 addMenu()
                 mw.workbenchActivated.connect(addMenu)
-                
-                
+
+
     def onPreferences():
         """Open the preferences dialog."""
         onControl()
-
-
-    styleButton = ("""
-        QToolButton {
-            background-color: lightGray;
-            border: 1px outset silver;
-        }
-
-        QToolButton:disabled {
-            background-color: darkGray;
-        }
-
-        QToolButton:hover {
-            background-color: lightBlue;
-        }
-
-        QToolButton:checked {
-            background-color: lightGreen;
-        }
-
-        QToolButton::menu-indicator {
-            subcontrol-origin: padding;
-            subcontrol-position: center center;
-        }
-
-        """)
-
-    styleMenuClose = ("""
-        QToolButton {
-            background-color: rgba(60,60,60,255);
-            color: silver;
-            border: 1px solid #1e1e1e;
-        }
-
-        QToolButton::menu-indicator {
-            image: none;
-        }
-
-        """)
-
-    styleContainer = ("QMenu{background: transparent}")
-
-    styleCombo = ("""
-        QComboBox {
-            background: transparent;
-            border: 1px solid transparent;
-        }
-
-        """)
-
-    styleQuickMenu = ("padding: 5px 10px 5px 10px")
-
-    styleQuickMenuItem = ("""
-        QMenu::item {
-            padding: 5px 20px 5px 20px;
-        }
-        
-        """)
-        
-    iconClose = respath + "PieMenuClose.svg"
-    iconMenu = respath + "PieMenuQuickMenu.svg"
-    iconUp = respath + "PieMenuUp.svg"
-    iconDown = respath + "PieMenuDown.svg"
-    iconAdd = respath + "PieMenuAdd.svg"
-    iconRemove = respath + "PieMenuRemove.svg"
-    iconRename = respath + "PieMenuRename.svg"
-    iconCopy = respath + "PieMenuCopy.svg"
-    iconRemoveCommand = respath + "PieMenuRemoveCommand.svg"
 
 
     def radiusSize(buttonSize):
@@ -434,7 +391,7 @@ def pieMenuStart():
                 sender.triggered.connect(lambda sender: onToolbarGroup(sender))
 
         def onToolbarGroup(sender):
-                                                                     
+
             paramGet = App.ParamGet("User parameter:BaseApp/PieMenu")
             if sender.text() == "Show":
                 paramGet.SetBool("ToolBar", True)
@@ -442,7 +399,7 @@ def pieMenuStart():
                 newPieGroup = createPie(sender.data())
             else:
                 return
-                
+
             workbenches = []
             commands = []
 
@@ -630,12 +587,12 @@ def pieMenuStart():
             self.menu.hide()
 
         def showAtMouse(self, notKeyTriggered=False):
-        
+
             nonlocal selectionTriggered
             nonlocal contextPhase
             global lastPosX
             global lastPosY
-            
+
             paramGet = App.ParamGet("User parameter:BaseApp/PieMenu")
 
             enableContext = paramGet.GetBool("EnableContext")
@@ -705,7 +662,7 @@ def pieMenuStart():
                     else:
                         lastPosX = pos.x()
                         lastPosY = pos.y()
-                        
+
                     for i in self.buttons:
                         i.move(i.property("ButtonX") + (self.menuSize - i.size().width()) / 2,
                                i.property("ButtonY") + (self.menuSize - i.size().height()) / 2)
@@ -820,7 +777,7 @@ def pieMenuStart():
 
 
     def listTopo():
-    
+
         nonlocal selectionTriggered
         nonlocal contextPhase
 
@@ -997,7 +954,7 @@ def pieMenuStart():
                     # after workbench activation actionMap has to be actualized
                     Gui.activateWorkbench(cmdWb)
                     return True
-                
+
         return False
 
 
@@ -1089,7 +1046,7 @@ def pieMenuStart():
 
             actionMapAll = getGuiActionMapAll()
             lastWorkbench = Gui.activeWorkbench()
-            
+
             while actualizeWorkbenchActions(actions, toolList, actionMapAll):
                 actionMapAll = getGuiActionMapAll()
             else:
@@ -1357,9 +1314,6 @@ def pieMenuStart():
 
     def createPie(text):
 
-                                              
-                  
-                  
 
         paramIndexGet = App.ParamGet("User parameter:BaseApp/PieMenu/Index")
         indexList = paramIndexGet.GetString("IndexList")
@@ -1414,9 +1368,9 @@ def pieMenuStart():
         text, ok = inputTextDialog("New menu")
         if not ok:
             return
-                
+
         createPie(text)
-                
+
 
     buttonAddPieMenu.clicked.connect(onButtonAddPieMenu)
 
@@ -1490,8 +1444,8 @@ def pieMenuStart():
     buttonRenamePieMenu.setIcon(QtGui.QIcon(iconRename))
     buttonRenamePieMenu.setMinimumHeight(30)
     buttonRenamePieMenu.setMinimumWidth(30)
-    
-    
+
+
     def onButtonRenamePieMenu():
 
         text, ok = inputTextDialog("Rename menu")
@@ -1529,7 +1483,7 @@ def pieMenuStart():
         cBoxUpdate()
 
     buttonRenamePieMenu.clicked.connect(onButtonRenamePieMenu)    
-    
+
     buttonCopyPieMenu = QtGui.QToolButton()
     buttonCopyPieMenu.setToolTip("Copy current pie menu")
     buttonCopyPieMenu.setIcon(QtGui.QIcon(iconCopy))
@@ -1552,7 +1506,7 @@ def pieMenuStart():
         return "-1"
 
     def copyIndexParams(grpOrg, grpCopy):
-        
+
         valButOrg = grpOrg.GetInt("Button")
         valRadOrg = grpOrg.GetInt("Radius")
         tbOrg = grpOrg.GetString("ToolList")
@@ -1586,9 +1540,9 @@ def pieMenuStart():
         grpCntCopy.SetString("ObjectSign", objSgnOrg)
         grpCntCopy.SetInt("ObjectValue", objValOrg)
 
-    
+
     def onButtonCopyPieMenu():
-        
+
         text, ok = inputTextDialog("Copy menu")
         if not ok:
             return
@@ -1641,7 +1595,7 @@ def pieMenuStart():
                 paramIndexGet.SetString(indexCopy, text)
 
         cBoxUpdate()
-    
+
     buttonCopyPieMenu.clicked.connect(onButtonCopyPieMenu)
 
     labelRadius = QtGui.QLabel("Pie size")
@@ -1818,7 +1772,7 @@ def pieMenuStart():
         buttonList()
 
     toolListWidget.itemChanged.connect(onToolListWidget)
-    
+
 
     def buttonList2ToolList(buttonListWidget):
 
@@ -1849,7 +1803,7 @@ def pieMenuStart():
             buttonListWidget.insertItem(currentIndex - 1, currentItem)
             buttonListWidget.setCurrentRow(currentIndex - 1)
             buttonList2ToolList(buttonListWidget)
-                                                          
+
     buttonUp.clicked.connect(onButtonUp)
 
     buttonDown = QtGui.QToolButton()
@@ -2394,9 +2348,9 @@ def pieMenuStart():
 
 
     def addAccessoriesMenu():
-    
+
         if mw.property("eventLoop"):
-        
+
             startAM = False
             try:
                 mw.mainWindowClosed
