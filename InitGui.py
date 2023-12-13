@@ -28,6 +28,7 @@ global PIE_MENU_VERSION
 PIE_MENU_VERSION = "1.2.7"
 
 def pieMenuStart():
+    """Main function that starts the Pie Menu."""
     import math
     import operator
     import platform
@@ -111,6 +112,7 @@ def pieMenuStart():
 
 
     def radiusSize(buttonSize):
+        """Calculates border radius for QToolButton based on the given buttonSize."""
 
         radius = str(math.trunc(buttonSize / 2))
 
@@ -118,6 +120,7 @@ def pieMenuStart():
 
 
     def iconSize(buttonSize):
+        """Calculates the size of an icon based on the given buttonSize."""
 
         icon = buttonSize / 3 * 2
 
@@ -125,13 +128,14 @@ def pieMenuStart():
 
 
     def closeButton(buttonSize=32):
+        """Style the close button."""
 
         icon = iconSize(buttonSize)
         radius = radiusSize(buttonSize)
 
         button = QtGui.QToolButton()
-        button.setProperty("ButtonX", 0)
-        button.setProperty("ButtonY", 0)
+        button.setProperty("ButtonX", 0) # +, right
+        button.setProperty("ButtonY", 0) # +, down
         button.setGeometry(0, 0, buttonSize, buttonSize)
         button.setIconSize(QtCore.QSize(icon, icon))
         button.setIcon(QtGui.QIcon(iconClose))
@@ -148,6 +152,7 @@ def pieMenuStart():
 
 
     def quickMenu(buttonSize=20):
+        """Style the quick menu button"""
 
         icon = iconSize(buttonSize)
         radius = radiusSize(buttonSize)
@@ -157,8 +162,8 @@ def pieMenuStart():
 
         button = QtGui.QToolButton()
         button.setMenu(menu)
-        button.setProperty("ButtonX", 0)
-        button.setProperty("ButtonY", 32)
+        button.setProperty("ButtonX", 0) # +,right
+        button.setProperty("ButtonY", 32) # +, down
         button.setGeometry(0, 0, buttonSize, buttonSize)
         button.setStyleSheet(styleMenuClose + radius)
         button.setIconSize(QtCore.QSize(icon, icon))
@@ -215,6 +220,7 @@ def pieMenuStart():
         prefButtonWidgetAction.setDefaultWidget(prefButton)
 
         def setChecked():
+            """Update the state of checkBoxes according to data on saved parameters."""
             paramGet = App.ParamGet("User parameter:BaseApp/PieMenu")
 
             if paramGet.GetString("TriggerMode") == "Hover":
@@ -350,7 +356,8 @@ def pieMenuStart():
 
                 if len(commands) != 0:
                     menu = QtGui.QMenu(i.windowTitle())
-                    menu.aboutToShow.connect(lambda sender=menu: onMenuToolbarGroup(sender))
+                    menu.aboutToShow.connect(lambda sender=menu: \
+                        onMenuToolbarGroup(sender))
                     menuToolBar.addMenu(menu)
                 else:
                     pass
@@ -368,7 +375,7 @@ def pieMenuStart():
                 else:
                     idMenu = entry
                 if idMenu == text:
-                    return True;
+                    return True
 
             return False
 
@@ -412,9 +419,9 @@ def pieMenuStart():
                 getGuiToolButtonData(sender.data(), None, None, workbenches)
                 toolbar_desc = ", ".join(workbenches)
                 toolbar_desc = toolbar_desc + ': ' + sender.data()
-                paramGet.SetString("ToolBar", toolbar_desc)            
+                paramGet.SetString("ToolBar", toolbar_desc)
                 PieMenuInstance.hide()
-                PieMenuInstance.showAtMouse(notKeyTriggered=True)                   
+                PieMenuInstance.showAtMouse(notKeyTriggered=True)
 
         toolbarGroup.triggered.connect(onToolbarGroup)
 
@@ -471,7 +478,8 @@ def pieMenuStart():
             self.menu = QtGui.QMenu(mw)
             self.menuSize = 0
             self.menu.setStyleSheet(styleContainer)
-            self.menu.setWindowFlags(self.menu.windowFlags() | QtCore.Qt.FramelessWindowHint)
+            self.menu.setWindowFlags(self.menu.windowFlags() |
+                QtCore.Qt.FramelessWindowHint)
             self.menu.setAttribute(QtCore.Qt.WA_TranslucentBackground)
 
             if compositingManager:
@@ -664,12 +672,15 @@ def pieMenuStart():
                         lastPosY = pos.y()
 
                     for i in self.buttons:
-                        i.move(i.property("ButtonX") + (self.menuSize - i.size().width()) / 2,
-                               i.property("ButtonY") + (self.menuSize - i.size().height()) / 2)
+                        i.move(i.property("ButtonX")
+                            + (self.menuSize - i.size().width()) / 2,
+                            i.property("ButtonY")
+                            + (self.menuSize - i.size().height()) / 2)
 
                         i.setVisible(True)
 
-                    self.menu.popup(QtCore.QPoint(pos.x() - self.menuSize / 2, pos.y() - self.menuSize / 2))
+                    self.menu.popup(QtCore.QPoint(pos.x() - self.menuSize / 2, pos.y()
+                        - self.menuSize / 2))
 
 
     sign = {
@@ -688,6 +699,7 @@ def pieMenuStart():
 
         contextAll.clear()
 
+        # Get current pieMenus using available index
         if indexList:
             indexList = indexList.split(".,.")
 
@@ -914,7 +926,7 @@ def pieMenuStart():
             workbench = extractWorkbench(command)
 
         if workbenches is not None:
-            if not workbench in workbenches:
+            if workbench not in workbenches:
                 workbenches.append(workbench)
 
 
@@ -934,7 +946,7 @@ def pieMenuStart():
             if i == "":
                 pass
             elif i in actionMap:
-                if not actionMap[i] in actions:
+                if actionMap[i] not in actions:
                     actions.append(actionMap[i])
             else:
                 cmd_parts = i.split("_")
@@ -1058,6 +1070,15 @@ def pieMenuStart():
 
 
     def getGroup(mode=0):
+        """
+        Obtain the parameter group.
+
+        When:
+        mode = 0: read from comboBox at GUI
+        mode = 1: read from CurrentPie parameter
+        mode = 2: read from ContextPie parameter
+        If it doesn't exists return default PieMenu group
+        """
         paramGet = App.ParamGet("User parameter:BaseApp/PieMenu")
         paramIndexGet = App.ParamGet("User parameter:BaseApp/PieMenu/Index")
         indexList = paramIndexGet.GetString("IndexList")
@@ -1075,6 +1096,7 @@ def pieMenuStart():
         else:
             text = cBox.currentText()
 
+        # Get list of available groups
         if indexList:
             indexList = indexList.split(".,.")
 
@@ -1089,6 +1111,8 @@ def pieMenuStart():
 
         group = None
 
+        # Iterate over thr available groups on indexList
+        # to find the group stored on `text` var
         for i in indexList:
             a = str(i)
             try:
@@ -1102,8 +1126,10 @@ def pieMenuStart():
                 pass
 
         if group:
+            # group was found, good
             pass
         else:
+            # return the default PieMenu group
             if 0 in indexList:
                 group = paramIndexGet.GetGroup("0")
             else:
@@ -1213,7 +1239,7 @@ def pieMenuStart():
                 pieList.append(paramIndexGet.GetString(a))
 
         duplicates = []
-        for i in pieList:            
+        for i in pieList:
             if i == currentPie:
                 pass
             else:
@@ -1417,7 +1443,7 @@ def pieMenuStart():
 
                 paramIndexGet.RemGroup(a)
                 paramIndexGet.RemString(a)
-                # special case treatment                                             
+                # special case treatment
                 if pie == currentPie:
                     currentPie = "Default"
                     try:
@@ -1425,7 +1451,7 @@ def pieMenuStart():
                     except TypeError:
                         paramGet.SetString("CurrentPie", currentPie)
                 if pie == contextPie:
-                        paramGet.RemString("ContextPie")
+                    paramGet.RemString("ContextPie")
             else:
                 pass
 
@@ -1482,7 +1508,7 @@ def pieMenuStart():
                     pass
         cBoxUpdate()
 
-    buttonRenamePieMenu.clicked.connect(onButtonRenamePieMenu)    
+    buttonRenamePieMenu.clicked.connect(onButtonRenamePieMenu)
 
     buttonCopyPieMenu = QtGui.QToolButton()
     buttonCopyPieMenu.setToolTip("Copy current pie menu")
@@ -1501,7 +1527,7 @@ def pieMenuStart():
             a = str(i)
             indexName = paramIndexGet.GetString(a)
             if indexName == currentMenuName:
-                return a;
+                return a
 
         return "-1"
 
@@ -2021,6 +2047,7 @@ def pieMenuStart():
 
         vertexSign = groupContext.GetString("VertexSign")
 
+        # Make sure vertexSign has a valid value
         if vertexSign in sign:
             pass
         else:
@@ -2195,7 +2222,7 @@ def pieMenuStart():
         if 0 in indexList:
             if restore:
                 group = paramIndexGet.GetGroup("0")
-                group.SetString("ToolList", ".,.".join(defaultTools))                
+                group.SetString("ToolList", ".,.".join(defaultTools))
             else:
                 pass
         else:
@@ -2232,18 +2259,21 @@ def pieMenuStart():
         singleSequence = seqAsString.split(', ')[-1]
 
         keySequenceEdit.setKeySequence(singleSequence)
-        App.ParamGet("User parameter:BaseApp/PieMenu").SetString("triggerShortcut", singleSequence)
+        App.ParamGet("User parameter:BaseApp/PieMenu") \
+            .SetString("triggerShortcut", singleSequence)
 
         if actionKey:
             actionKey.setShortcut(keySequenceEdit.keySequence())
 
+    keySequenceLabel = QtGui.QLabel("Custom trigger shortcut")
+
     keySequenceEdit = QtGui.QKeySequenceEdit()
-    keySequenceEdit.setKeySequence(App.ParamGet("User parameter:BaseApp/PieMenu").GetString("triggerShortcut") or "TAB")
+    keySequenceEdit.setKeySequence(App.ParamGet("User parameter:BaseApp/PieMenu") \
+                                   .GetString("triggerShortcut") or "TAB")
     keySequenceEdit.keySequenceChanged.connect(onTriggerSequenceChanged)
 
-    keySequenceLabel = QtGui.QLabel("Trigger shortcut")
-
     def onControl():
+        """Initializes the preferences dialog."""
 
         global pieMenuDialog
 
