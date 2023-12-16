@@ -233,6 +233,11 @@ def pieMenuStart():
             else:
                 pass
 
+            if paramGet.GetBool("EnableCustomTrigger"):
+                checkCustomShortcut.setChecked(True)
+            else:
+                checkCustomShortcut.setChecked(False)
+
         setChecked()
 
         def onModeGroup():
@@ -1266,6 +1271,7 @@ def pieMenuStart():
         toolList()
         setDefaults()
         setCheckContext()
+        setCheckCustomShortcut()
 
     cBox.currentIndexChanged.connect(onPieChange)
 
@@ -2037,6 +2043,7 @@ def pieMenuStart():
         group.RemGroup("Context")
         setDefaults()
         setCheckContext()
+        setCheckCustomShortcut()
 
     resetButton.clicked.connect(onResetButton)
 
@@ -2260,16 +2267,42 @@ def pieMenuStart():
 
         keySequenceEdit.setKeySequence(singleSequence)
         App.ParamGet("User parameter:BaseApp/PieMenu") \
-            .SetString("triggerShortcut", singleSequence)
+            .SetString("CustomTriggerShortcut", singleSequence)
 
         if actionKey:
             actionKey.setShortcut(keySequenceEdit.keySequence())
 
-    keySequenceLabel = QtGui.QLabel("Custom trigger shortcut")
+    customShortcutLabel = QtGui.QLabel("Override 'TAB' shortcut")
+    checkCustomShortcut = QtGui.QCheckBox()
 
+    def setCheckCustomShortcut():
+        """Update editability of keySequenceEdit element."""
+        paramGet = App.ParamGet("User parameter:BaseApp/PieMenu")
+
+        if paramGet.GetBool("EnableCustomTrigger"):
+            keySequenceEdit.setEnabled(True)
+        else:
+            keySequenceEdit.setEnabled(False)
+
+    def onCheckCustomShorcut():
+        """Update PieMenu/EnableCustomTrigger value on checkBox change."""
+        paramGet = App.ParamGet("User parameter:BaseApp/PieMenu")
+
+        if checkCustomShortcut.isChecked():
+            keySequenceEdit.setEnabled(True)
+            paramGet.SetBool("EnableCustomTrigger", 1)
+        else:
+            keySequenceEdit.setEnabled(False)
+            paramGet.SetBool("EnableCustomTrigger", 0)
+            # Removing the custom shortcut restores the TAB shortcut
+            paramGet.RemString("CustomTriggerShortcut")
+
+    checkCustomShortcut.stateChanged.connect(onCheckCustomShorcut)
+
+    keySequenceLabel = QtGui.QLabel("Custom trigger shortcut")
     keySequenceEdit = QtGui.QKeySequenceEdit()
     keySequenceEdit.setKeySequence(App.ParamGet("User parameter:BaseApp/PieMenu") \
-                                   .GetString("triggerShortcut") or "TAB")
+                                   .GetString("CustomTriggerShortcut") or "TAB")
     keySequenceEdit.keySequenceChanged.connect(onTriggerSequenceChanged)
 
     def onControl():
@@ -2288,6 +2321,11 @@ def pieMenuStart():
         pieMenuTab = QtGui.QWidget()
         pieMenuTabLayout = QtGui.QVBoxLayout()
         pieMenuTab.setLayout(pieMenuTabLayout)
+
+        layoutNewShortcut = QtGui.QHBoxLayout()
+        layoutNewShortcut.addWidget(customShortcutLabel)
+        layoutNewShortcut.addStretch(1)
+        layoutNewShortcut.addWidget(checkCustomShortcut)
 
         layoutKeySequenceEdit = QtGui.QHBoxLayout()
         layoutKeySequenceEdit.addWidget(keySequenceLabel)
@@ -2311,11 +2349,12 @@ def pieMenuStart():
         layoutButton.addStretch(1)
         layoutButton.addWidget(spinButton)
 
-        pieMenuTabLayout.insertLayout(0, layoutKeySequenceEdit)
-        pieMenuTabLayout.insertLayout(1, layoutAddRemove)
-        pieMenuTabLayout.insertSpacing(2, 24)
-        pieMenuTabLayout.insertLayout(3, layoutRadius)
-        pieMenuTabLayout.insertLayout(4, layoutButton)
+        pieMenuTabLayout.insertLayout(0, layoutNewShortcut)
+        pieMenuTabLayout.insertLayout(1, layoutKeySequenceEdit)
+        pieMenuTabLayout.insertLayout(2, layoutAddRemove)
+        pieMenuTabLayout.insertSpacing(3, 24)
+        pieMenuTabLayout.insertLayout(4, layoutRadius)
+        pieMenuTabLayout.insertLayout(5, layoutButton)
         pieMenuTabLayout.addStretch(0)
 
         contextTab = QtGui.QWidget()
@@ -2394,6 +2433,7 @@ def pieMenuStart():
                 accessoriesMenu()
 
 
+    # Start of the application
     mw = Gui.getMainWindow()
     actionKey = None
     start = True
