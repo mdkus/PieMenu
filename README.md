@@ -26,7 +26,7 @@ Windows:
 `C:\Users\user_name\AppData\Roaming\FreeCAD\Mod\PieMenu\InitGui.py`
 
 ### Usage
-Press the Tab key on the keyboard to invoke PieMenu or by Accessories Menu
+Press the Tab key on the keyboard to invoke PieMenu or set shortcut via Accessories Menu
 
 Validate or Cancel, change length/size value directly with spinbox during editing of a function (Pad, Pocket, Chamfer, Fillet, Thickness)
 ![Capture d’écran (1)](https://github.com/Grubuntu/PieMenu/assets/56045316/c76e2098-5756-42c7-9675-884c726b456a)
